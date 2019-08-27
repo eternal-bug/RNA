@@ -2,6 +2,16 @@
 
 ## 0. 介绍
 
+```
+    read                                     ----
+*   read              ----                 ----
+*   read             ----                 ----
+*   read      :    ----       ----       ----
++   genome    : =======================================
++   annotation:   |-gene1-|  |-gene2-|  |-gene3-|
+```
+
++ 分析流程的结构是(仿照[`Tom Battaglia`](https://github.com/twbattaglia))
 
 ```bash
       database                   Workflow                        tools
@@ -327,5 +337,8 @@ stringtie --help
 
 + 安装
 
-
+```R
+source("http://bioconductor.org/biocLite.R")
+biocLite("Ballgown")
+```
 
