@@ -1,79 +1,4 @@
-# RNA-seq分析
 
-## 0. 介绍
-
-```
-    read                                     ----
-*   read              ----                 ----
-*   read             ----                 ----
-*   read      :    ----       ----       ----
-+   genome    : =======================================
-+   annotation:   |-gene1-|  |-gene2-|  |-gene3-|
-```
-
-+ 分析流程的结构是(仿照[`Tom Battaglia`](https://github.com/twbattaglia))
-
-```bash
-      database                   Workflow                        tools
-======================================================================================
-  
-+=================+     +-------------------------+                               
-|     database    |     |      Quality Analysis   |---------------> fastqc 
-+=================+     +-------------------------+                                
-|+------+         |                 v                                      
-|| rRNA |---------|--+  +-------------------------+
-|+------+         |  |  | Base Quality Filtering  |------------> TrimGalore
-|  +------+       |  |  +-------------------------+
-|  |genome|-------|-+|              v
-|  +------+       | ||  +-------------------------+
-|     +----------+| |+->| rRNA Sequence Filtering |------------> SortMeRNA
-|     |  Genome  || |   +-------------------------+
-|     |Annotation|| |               v
-|     +----------+| |   +-------------------------+
-|          |      | +-->|   Genome Alignment      |------------> hisat2
-+----------|------+     +-------------------------+
-           |                        v
-           |            +-------------------------+
-           +----------->|  Count Mapped Reads     |------------> HTseq
-                        +-------------------------+
-                                    v
-                        +-------------------------+
-                        | Differential Expression |------------> DESeq2
-                        +-------------------------+
-                                    v
-                        +-------------------------+
-                        |     Pathway analysis    |------------> ClusterProfiler
-                        +-------------------------+
-```
-
-## 1. 前期准备
-
-在进行数据处理之前，需要将大致的目录生成好，这样一来将数据存放的位置有序一些，便于查看，二来在程序运行的时候能够更加方便的明确填写文件路径。将后面可能会用到的文件存放的文件夹大致拟定一下，便于自己理解和查找文件，这里不需要将后面所有可能用到的文件夹都新建，只是建立一个整体的文件夹的目录结构就行了。这样层级清晰，可以防止出错，在某种程序上提高了效率节省时间。
-
-```bash
-# 首先定位到自己这个用户的位置
-$ cd ~
-
-# 然后新建项目的文件夹
-# 新建一个biosoft文件夹用于存放生物软件工具
-$ mkdir biosoft
-
-# 新建一个项目文件夹其中包含大鼠的文件夹
-$ mkdir -p project/rat
-
-# 进入
-$ cd project/rat
-
-# 将今后各个文件需要存放的文件夹可以事先拟定一下
-$ mkdir annotation genome sequence output script
-```
-
-| 文件夹名 | 说明 |
-| ---| --- |
-| annotation | 存放注释文件(.gff .bed .gff3) |
-| genome | 存放基因组与索引文件(.fa .bt)|
-| sequence | 存放测序数据(.fastq.gz) |
-| output | 存放各种处理的输出文件 |
 | script | 存放脚本的位置 |
 
 使用`tree`命令看一下我们设置的目录结构
@@ -88,6 +13,7 @@ $ tree
 ├── annotation  用于存放大鼠的基因组注释信息(.gff/gtf)
 ├── genome      用于存放大鼠的基因组数据(.fasta)
 ├── output      用于存放处理后的数据
+├── script      用于部分脚本
 └── sequence    用于存放测序原始数据
 ```
 
@@ -95,7 +21,7 @@ $ tree
 
 ### 2.0 conda
 
-管理生信工具
+conda可以很方便的安装和管理生信相关的工具
 
 ```bash
 # 下载文件
@@ -110,14 +36,15 @@ conda config --add channels defaults
 conda config --add channels r
 conda config --add channels bioconda
 ```
-
 建立python3.6的环境 
 
 ```bash
-
+conda create python36 python=3.6
 ```
 
 ### 2.1 sratoolkit
+
+sra是NCBI的用于下载数据以及转化数据使用
 
 ```bash
 $ cd ~/biosoft
@@ -178,7 +105,9 @@ pip install multiqc
 | 手册 | https://cutadapt.readthedocs.io/en/stable/guide.html |
 
 ```bash
+conda activate python36
 pip install cutadapt
+conda deactivate
 ```
 ### 2.5 trimmomatic
 
@@ -245,6 +174,64 @@ $ export PATH="~/biosoft/hisat2-2.1.0:$PATH"
 # 测试是否可用
 $ hisat2 -h
 ```
+### sortmerna
+
+在RNA测序中有很多是rRNA，sortmerna是一款将高通量的测序中的rRNA进行剔除的软件
+
+|   |  站点 |
+| --- | --- |
+| 官网 | https://bioinfo.lifl.fr/RNA/sortmerna/ |
+| 手册 | https://bioinfo.lifl.fr/RNA/sortmerna/code/SortMeRNA-user-manual-v2.1.pdf |
+| github | https://github.com/biocore/sortmerna/blob/master/README.md |
+| 中文解读 | https://www.jianshu.com/p/6b7a442d293f |
+
+
+```bash
+$ cd ~/biosoft/
+
+# 下载软件
+$ wget https://github.com/biocore/sortmerna/archive/2.1.tar.gz -O sortmerna-2.1.tar.gz
+
+# 解压
+$ tar -xzvf sortmerna-2.1.tar.gz
+$ cd sortmerna-2.1
+
+# 配置相关信息
+$ ./configure --prefix=$PWD
+
+# 编译
+$ make -j 4
+
+# 查看是否成功
+$ ./sortmerna --help
+
+# 导入到环境变量
+$ export PATH="$(pwd):$PATH"
+
+# 把数据库文件移动到能找到的地方
+$ mv ./rRNA_databases/ ~/database/sortmerna_db/rRNA_databases
+
+# 相关库文件
+$ cd ~/database/rRNA_databases
+$ sortmerna_ref_data=$(pwd)/rRNA_databases/silva-bac-16s-id90.fasta,$(pwd)/index/silva-bac-16s-db:\
+$(pwd)/rRNA_databases/silva-bac-23s-id98.fasta,$(pwd)/index/silva-bac-23s-db:\
+$(pwd)/rRNA_databases/silva-arc-16s-id95.fasta,$(pwd)/index/silva-arc-16s-db:\
+$(pwd)/rRNA_databases/silva-arc-23s-id98.fasta,$(pwd)/index/silva-arc-23s-db:\
+$(pwd)/rRNA_databases/silva-euk-18s-id95.fasta,$(pwd)/index/silva-euk-18s-db:\
+$(pwd)/rRNA_databases/silva-euk-28s-id98.fasta,$(pwd)/index/silva-euk-28s-db:\
+$(pwd)/rRNA_databases/rfam-5s-database-id98.fasta,$(pwd)/index/rfam-5s-db:\
+$(pwd)/rRNA_databases/rfam-5.8s-database-id98.fasta,$(pwd)/index/rfam-5.8s-db
+
+# 真核生物的rRNA不需要那么多(5s, 5.8s, 18s, 28s)
+$ euk_rNRA_ref_data=$(pwd)/rRNA_databases/silva-euk-18s-id95.fasta,$(pwd)/index/silva-euk-18s-db:\
+$(pwd)/rRNA_databases/silva-euk-28s-id98.fasta,$(pwd)/index/silva-euk-28s-db:\
+$(pwd)/rRNA_databases/rfam-5s-database-id98.fasta,$(pwd)/index/rfam-5s-db:\
+$(pwd)/rRNA_databases/rfam-5.8s-database-id98.fasta,$(pwd)/index/rfam-5.8s-db
+
+# 建立数据库索引
+$ indexdb_rna --ref $data
+```
+
 ### 2.7 samtools
 
 比对得到的sam或者bam文件的各种操作
@@ -258,24 +245,33 @@ $ hisat2 -h
 samtools是对比对后得到的文件进行格式转化处理合并等操作的工具。
 
 ```bash
-cd ~/biosoft
-wget -c https://github.com/samtools/samtools/releases/download/1.9/samtools-1.9.tar.bz2
-tar jxvf samtools-1.9.tar.bz2
-cd samtools-1.9
-./configure --prefix=$(pwd)
-make
+$ cd ~/biosoft
+
+# 下载
+$ wget -c https://github.com/samtools/samtools/releases/download/1.9/samtools-1.9.tar.bz2
+
+# 解压
+$ tar jxvf samtools-1.9.tar.bz2
+$ cd samtools-1.9
+
+# 配置信息
+$ ./configure --prefix=$(pwd)
+
+# 开始编译
+$ make -j 4
 
 # 导入临时环境变量
-export PATH="$(pwd):$PATH"
+$ export PATH="$(pwd):$PATH"
 ```
 ### 2.8 HTseq
 
 对比对后的文件进行read计数
 
+```bash
+$ conda activate python36
+$ pip install HTseq
+$ conda deactivate
 ```
-pip install HTseq
-```
-
 ### 2.9 R
 
 - 官网：https://www.r-project.org
@@ -300,8 +296,8 @@ R语言中集合了多种生物信息学的分析工具，其中RNA-seq分析的
 
 parallel是进行多线程运行的工具，并行运行可以提升效率，节省时间
 
-```
-brew install parallel
+```bash
+$ brew install parallel
 ```
 
 ### StringTie
@@ -317,17 +313,17 @@ brew install parallel
 + 安装
 
 ```bash
-cd ~/biosoft
+$ cd ~/biosoft
 
-wget http://ccb.jhu.edu/software/stringtie/dl/stringtie-1.3.6.OSX_x86_64.tar.gz
+$ wget http://ccb.jhu.edu/software/stringtie/dl/stringtie-1.3.6.OSX_x86_64.tar.gz
 
-tar -xzvf stringtie-1.3.6.OSX_x86_64.tar.gz
-mv stringtie-1.3.6.OSX_x86_64 stringtie-1.3.6
-cd stringtie-1.3.6
+$ tar -xzvf stringtie-1.3.6.OSX_x86_64.tar.gz
+$ mv stringtie-1.3.6.OSX_x86_64 stringtie-1.3.6
+$ cd stringtie-1.3.6
 
-export PATH="$(pwd):$PATH"
+$ export PATH="$(pwd):$PATH"
 
-stringtie --help
+$ stringtie --help
 ```
 ### Ballgown
 
@@ -366,9 +362,125 @@ biocLite("Ballgown")
 $ cd ~/project/rat/genome
 $ wget ftp://ftp.ensembl.org/pub/release-97/fasta/rattus_norvegicus/dna/Rattus_norvegicus.Rnor_6.0.dna.toplevel.fa.gz
 $ gzip -d Rattus_norvegicus.Rnor_6.0.dna.toplevel.fa.gz
-
+```
+目前大鼠的基因组测序版本到了`6`，这里为了后面方便操作，改名为`rn6`
+```
 # 改名（方便后面使用，名字太长一来不方便输入，二来可能会输错）
-mv Rattus_norvegicus.Rnor_6.0.dna.toplevel.fa rn6.fa
+$ mv Rattus_norvegicus.Rnor_6.0.dna.toplevel.fa rn6.fa
+```
+下载得到的基因组文件可以查看一下包含哪些染色体，确认文件是否下载正确。
+
+```bash
+cat rn6.fa | grep "^>" 
+```
+可以看到除了`1-20`号+`X`+`Y`+`MT`之外还有很多别的ID名。这些都是`scaffold`
+```
+>1 dna:chromosome chromosome:Rnor_6.0:1:1:282763074:1 REF
+>2 dna:chromosome chromosome:Rnor_6.0:2:1:266435125:1 REF
+>3 dna:chromosome chromosome:Rnor_6.0:3:1:177699992:1 REF
+>4 dna:chromosome chromosome:Rnor_6.0:4:1:184226339:1 REF
+>5 dna:chromosome chromosome:Rnor_6.0:5:1:173707219:1 REF
+>6 dna:chromosome chromosome:Rnor_6.0:6:1:147991367:1 REF
+>7 dna:chromosome chromosome:Rnor_6.0:7:1:145729302:1 REF
+>8 dna:chromosome chromosome:Rnor_6.0:8:1:133307652:1 REF
+>9 dna:chromosome chromosome:Rnor_6.0:9:1:122095297:1 REF
+>10 dna:chromosome chromosome:Rnor_6.0:10:1:112626471:1 REF
+>11 dna:chromosome chromosome:Rnor_6.0:11:1:90463843:1 REF
+>12 dna:chromosome chromosome:Rnor_6.0:12:1:52716770:1 REF
+>13 dna:chromosome chromosome:Rnor_6.0:13:1:114033958:1 REF
+>14 dna:chromosome chromosome:Rnor_6.0:14:1:115493446:1 REF
+>15 dna:chromosome chromosome:Rnor_6.0:15:1:111246239:1 REF
+>16 dna:chromosome chromosome:Rnor_6.0:16:1:90668790:1 REF
+>17 dna:chromosome chromosome:Rnor_6.0:17:1:90843779:1 REF
+>18 dna:chromosome chromosome:Rnor_6.0:18:1:88201929:1 REF
+>19 dna:chromosome chromosome:Rnor_6.0:19:1:62275575:1 REF
+>20 dna:chromosome chromosome:Rnor_6.0:20:1:56205956:1 REF
+>X dna:chromosome chromosome:Rnor_6.0:X:1:159970021:1 REF
+>Y dna:chromosome chromosome:Rnor_6.0:Y:1:3310458:1 REF
+>MT dna:chromosome chromosome:Rnor_6.0:MT:1:16313:1 REF
+>KL568162.1 dna:scaffold scaffold:Rnor_6.0:KL568162.1:1:10937627:1 REF
+>KL568139.1 dna:scaffold scaffold:Rnor_6.0:KL568139.1:1:9752924:1 REF
+>KL568161.1 dna:scaffold scaffold:Rnor_6.0:KL568161.1:1:7627431:1 REF
+...
+```
+这里看到每一条染色体的名称后面还跟了一些描述信息，这些描述信息就是当前组装版本，长度等等信息，但是这个信息会妨碍后面写脚本统计或者一些分析，所以这里最好去掉
+
+```bash
+# 首先将之前的名称更改一下
+$ mv rn6.fa rn6.raw.fa
+
+# 然后去除染色体编号后的描述信息
+$ cat rn6.raw.fa | perl -n -e 'if(m/^>(.+?)(?:\s|$)/){ print ">$1\n";}else{print}' > rn6.fa
+
+# 删除
+$ rm rn6.raw.fa
+```
++ 可以使用脚本统计每一条染色体的长度
+
+```bash
+$ cat rn6.fa | perl -n -e '
+    s/\r?\n//;
+    if(m/^>(.+?)\s*$/){
+        $title = $1;
+        push @t, $title;
+    }elsif(defined $title){
+        $title_len{$title} += length($_);
+    }
+    END{
+        for my $title (@t){
+            print "$title","\t","$title_len{$title}","\n";
+        }
+    }
+'
+```
+长度
+
+```
+1	282763074
+2	266435125
+3	177699992
+4	184226339
+5	173707219
+6	147991367
+7	145729302
+8	133307652
+9	122095297
+10	112626471
+11	90463843
+12	52716770
+13	114033958
+14	115493446
+15	111246239
+16	90668790
+17	90843779
+18	88201929
+19	62275575
+20	56205956
+X	159970021
+Y	3310458
+MT	16313
+KL568162.1	10937627
+KL568139.1	9752924
+KL568161.1	7627431
+...
+```
+这里为了方便演示，直接用1号染色体的基因组
+
+```bash
+$ cat rn6.fa | perl -n -e '
+  if(m/^>/){
+    if(m/>1$/){
+      $title = 1;
+    }else{
+      $title = 0;
+    }
+  }else{
+    push @s, $_ if $title;
+  }
+  END{
+    printf ">1\n%s", join("", @s);
+  }
+' > rn6.chr1.fa
 ```
 > **基因组数据说明**
 > 
@@ -387,17 +499,22 @@ mv Rattus_norvegicus.Rnor_6.0.dna.toplevel.fa rn6.fa
 在`hisat2` 官网上可以找到现成的已经建立好索引的大鼠基因组文件，如果电脑配置一般建议直接下载好索引文件，可以直接下载这个索引文件（因为建立索引文件时间较长1个小时以上）
 
 ```bash
-cd ~/project/rat/genome
-wget ftp://ftp.ccb.jhu.edu/pub/infphilo/hisat2/data/rn6.tar.gz
-gzip -d rn6.tar.gz
+$ cd ~/project/rat/genome
+$ wget ftp://ftp.ccb.jhu.edu/pub/infphilo/hisat2/data/rn6.tar.gz
+$ gzip -d rn6.tar.gz
 ```
 + 下载注释信息
 
 ```bash
-cd ~/project/rat/annotation
-wget ftp://ftp.ensembl.org/pub/release-97/gtf/rattus_norvegicus/Rattus_norvegicus.Rnor_6.0.97.gtf.gz
-gzip -d Rattus_norvegicus.Rnor_6.0.97.gtf.gz
-mv Rattus_norvegicus.Rnor_6.0.97.gtf rn6.gff
+$ cd ~/project/rat/annotation
+$ wget ftp://ftp.ensembl.org/pub/release-97/gtf/rattus_norvegicus/Rattus_norvegicus.Rnor_6.0.97.gtf.gz
+$ gzip -d Rattus_norvegicus.Rnor_6.0.97.gtf.gz
+
+# 同样的也改名
+$ mv Rattus_norvegicus.Rnor_6.0.97.gtf rn6.gff
+
+# 使用head查看部分
+$ head rn6.gff
 ```
 
 > **注释数据说明**
@@ -417,29 +534,9 @@ mv Rattus_norvegicus.Rnor_6.0.97.gtf rn6.gff
 >
 > gff文件开头描述了这个注释数据的基本信息，比如版本号，更新时间，组装的NCBI的Assembly编号等等，后面每一行表示描述信息，说明了在哪条染色体的什么位置是什么东西。比如第6行的表示在1号染色体正链上 396700-409750 这个范围内有一个基因编号为ENSRNOG00000046319的基因
 
-#### UCSC
-
-另外就是是UCSC的官网，这里包含了人类以及常见的哺乳动物的各个版本的基因组序列
-
-用浏览器[点击进入UCSC](http://genome.ucsc.edu/) - 
-
-```
-cd ~/project/rat/genome
-wget http://hgdownload.soe.ucsc.edu/goldenPath/rn6/bigZips/rn6.fa.gz
-gzip -d rn6.fa.gz
-# rn6.fa
-```
-注释信息
-
-```bash
-http://genome.ucsc.edu/cgi-bin/hgTables
-```
-
-这里就在ENSEMBL数据库中下载数据
-
 ### 3.2 测试数据（实验数据）
 
-为了进行演示，从NCBI上查找相关的`RNA-seq`数据进行下载，在GEO数据库中找了一个数据GSE72960，对应的SRP数据为`SRP063345`，对应的文献是：
+为了进行演示，从NCBI上查找相关的`RNA-seq`数据进行下载，在GEO数据库中找了一个数据`GSE72960`，对应的SRP数据为`SRP063345`，对应的文献是：
 
 [肝硬化分子肝癌的器官转录组分析和溶血磷脂酸途径抑制 - 《Molecular Liver Cancer Prevention in Cirrhosis by Organ Transcriptome Analysis and Lysophosphatidic Acid Pathway Inhibition》](https://www.ncbi.nlm.nih.gov/pmc/articles/PMC5161110/)
 
@@ -472,8 +569,8 @@ $ rm *.sra
 ```
 > **fastq格式介绍**
 > ```bash
->     cd ~/project/rat/sequence
->     gzip -d -c SRR2190795.fastq.gz | head -n 20
+>    $ cd ~/project/rat/sequence
+>    $ gzip -d -c SRR2190795.fastq.gz | head -n 20
 > ```
 > 
 > @SRR2190795.1 HWI-ST1147:240:C5NY7ACXX:1:1101:1320:2244 length=100
@@ -515,7 +612,7 @@ fastqc [选项] [测序文件]
 $ cd ~/project/rat/sequence
 
 # 因为程序不会自动新建目录，这里新建一个目录
-mkdir -p ../output/fastqc
+$ mkdir -p ../output/fastqc
 
 # -t 指定线程数
 # -o 指定输出文件夹
@@ -546,9 +643,9 @@ SRR2240183_fastqc.zip  SRR2240186_fastqc.zip
 这里因为有多份报告，有时候查看不是特别方便，这里有一个将所有的fastqc的检测报告合并到一个文件上的程序`multiqc`
 
 ```bash
-cd ~/project/rat/output/fastqc
+$ cd ~/project/rat/output/fastqc
 
-multiqc .
+$ multiqc .
 ```
 主要看几个图
 
@@ -580,13 +677,13 @@ multiqc .
 
 上面看到，在接头那里是显示的通过，但是可以看到有部分是有4个碱基与接头序列匹配的，属于Illumina的通用接头。另外也可以看到，除了可能存在接头的情况，在测序质量那里也可以看到在`5'`端存在低质量的测序区域，所以像两端这种低质量的区域也是要去除的的，这一步采用`trimmomatic`进行。
 
-```
-cd ~/project/rat/sequence
+```bash
+$ cd ~/project/rat/sequence
 # 新建文件夹
-mkdir -p ../output/adapter/
+$ mkdir -p ../output/adapter/
 
 # 循环处理文件夹下的
-for i in $(ls *.fastq.gz);
+$ for i in $(ls *.fastq.gz);
 do
     # --minimum-length 如果剔除接头后read长度低于30，这条read将会被丢弃
     # --overlap        如果两端的序列与接头有4个碱基的匹配将会被剔除
@@ -595,18 +692,16 @@ do
     --minimum-length 30 --overlap 4 --trim-n \
     -o ../output/adapter/${i}  ${i}
 done
-
-
 ```
 ![](./pic/Adapter.png)
 
 ### 4.4 再次去除低质量区域
 
 ```bash
-cd ~/project/rat/output/adapter/
-mkdir ../trim
+$ cd ~/project/rat/output/adapter/
+$ mkdir ../trim
 
-parallel -j 4 "
+$ parallel -j 4 "
   # LEADING:20，从序列的开头开始去掉质量值小于 20 的碱基
   # TRAILING:20，从序列的末尾开始去掉质量值小于 20 的碱基
   # SLIDINGWINDOW:5:15，从 5' 端开始以 5bp 的窗口计算碱基平均质量，如果此平均值低于 15，则从这个位置截断read
@@ -619,33 +714,67 @@ parallel -j 4 "
 ### 4.3 再次查看质量情况
 
 ```bash
-cd ~/project/rat/output/trim
+$ cd ~/project/rat/output/trim
 
-mkdir ../fastqc_trim
-parallel -j 4 "
+$ mkdir ../fastqc_trim
+$ parallel -j 4 "
     fastqc -t 4 -o ../fastqc_trim {1}
 " ::: $(ls *.gz)
 
-cd ../fastqc_trim
-multiqc .
+$ cd ../fastqc_trim
+$ multiqc .
 ```
 相对于上面的情况，现在好多了
 
 ## 5. 去除rRNA序列
 
-使用sortmerna进行rRNA序列的剔除，这一步先跳过
+如果在提取RNA过程中没有对RNA进行筛选的情况下，那么得到的大部分将会是`rRNA`，这个对于后续的分析可能会存在影响，另外也会让比对的时间变长。
 
-### 5.1 下载rRNA的数据库文件
+> **注意**：在使用`sortmerna`的时候需要确保测序文件是**未压缩的文件**
 
-### 5.2 开始剔除
+```bash
+$ cd ~/project/rat/output
+$ mkdir -p ./rRNA/discard
 
+$ cd trim
 
+$ parallel -j 4 "
+  # 解压测序文件
+  gzip -d {1}*.fq.gz
+  
+  # euk_rNRA_ref_data就是之前安装sortmerna的时候定义的数据库文件
+  # --reads  : 测序文件
+  # --aligned: 与rRNA数据库能比对上的序列(后续不需要的)
+  # --other  : 与rRNA数据库不能比对上的序列(后续需要的)
+  # --fastx  : 输出fastq文件
+  # --log    : 生成日志文件
+  # -a       : 线程数
+  # -v       : 吵闹模式
+  
+  # 注意--aligned和--other后接文件名前缀，不用在加什么 .fq 或者 .fastq之类的，否则将会生成 xxx.fq.fq
+  sortmerna \
+    --ref $euk_rNRA_ref_data \
+    --reads {1}*.fq \
+    --aligned ../rRNA/discard/{1} \
+    --other ../rRNA/{1} \
+    --fastx \
+    --log \
+    -a 4 \
+    -v
+  
+  # 压缩fastq文件
+  gzip ../rRNA/{1}.fq
+  gzip ../rRNA/discard/{1}.fq
+" ::: $(ls *.fq.gz | perl -n -e 'print $1."\n" if m/(.+?)_/')
+```
 
-## 5. 序列比对
+## 6. 序列比对
+
+得到干净的测序数据之后，
 
 ![](./pic/RNA-Seq-alignment.png)
 
-### 5.1 建立索引
+### 6.1 建立索引
 
 这一步使用`hisat2`中的工具`hisat2-build`建立索引。
 
@@ -654,27 +783,14 @@ multiqc .
 ```
 hisat2-build [选项] [基因组序列(.fa)] [索引文件的前缀名]
 ```
-+ 实际使用
++ 开始使用
 
 ```bash
-cd ~/project/rat/genome
-mkdir index
-cd index
+$ cd ~/project/rat/genome
+$ mkdir index
+$ cd index
 
-
-# ============ 转录组水平 ========
-# 文件提取外显子信息
-extract_exons.py ../../annotation/rn6.gff > rn6.exons
-
-# 文件提取剪接位点信息
-extract_splice_sites.py ../../annotation/rn6.gff > rn6.splicesites
-
-# -p 指定线程数，数量越多建立速度越快，但是要根据自己电脑性能来看
-# 基因水平上就不用了
-hisat2-build ../rn6.fa --exon rn6.exons -ss rn6.ss -p 6 rn6
-
-# =========== 基因水平上这样就行了 ========
-hisat2-build  -p 6 ../rn6.fa rn6
+$ hisat2-build  -p 6 ../rn6.fa rn6
 ```
 在运行过程中会有部分信息提示，其中说到建立索引文件的分块情况以及运行时间的统计
 
@@ -693,7 +809,7 @@ rn6.8.ht2
 8个文件，这些文件是对基因组进行压缩之后的文件，这个将基因组序列数据分块成了8份，在执行序列比对的时候直接使用这些文件而不是基因组`rn6.fa`文件。
 
 
-### 5.2  开始比对
+### 6.2  开始比对
 
 这里使用hasat2进行比对
 
@@ -705,16 +821,16 @@ hisat2 [选项] -x [索引文件] [ -1 1测序文件 -2 2测序文件 -U 未成�
 + 实际使用
 
 ```bash
-cd ~/project/rat/output
+$ cd ~/project/rat/output
 
-mkdir align
-cd trim
+$ mkdir align
+$ cd rRNA
 
-parallel -k -j 4 "
+$ parallel -k -j 4 "
     hisat2 -t -x ../../genome/index/rn6 \
-      -U {1}.fastq.gz -S ../align/{1}.sam \
+      -U {1}.fq.gz -S ../align/{1}.sam \
       2>../align/{1}.log
-" ::: $(ls *.gz | perl -p -e 's/.fastq.gz$//')
+" ::: $(ls *.gz | perl -p -e 's/.fq.gz$//')
 ```
 比对完成之后可以进入文件夹查看一下日志信息
 
@@ -722,8 +838,9 @@ parallel -k -j 4 "
 $ cd ~/project/rat/output/align
 
 $ cat SRR2190795.log
+```
 
-
+```
 Time loading forward index: 00:00:17
 Time loading reference: 00:00:04
 Multiseed full-index search: 00:18:59
@@ -753,7 +870,9 @@ $ parallel -k -j 4 "
 $ rm *.sam
 
 $ ls
+```
 
+```
 SRR2190795.log          SRR2240185.log
 SRR2190795.sort.bam     SRR2240185.sort.bam
 SRR2190795.sort.bam.bai SRR2240185.sort.bam.bai
@@ -768,7 +887,7 @@ SRR2240184.sort.bam     SRR2240228.sort.bam
 SRR2240184.sort.bam.bai SRR2240228.sort.bam.bai
 ```
 
-## 6. 表达量统计
+## 7. 表达量统计
 
 ![](./pic/read_map_and_count.png)
 
@@ -834,42 +953,61 @@ ENSRNOG00000000024	843
 ENSRNOG00000000033	27
 ```
 
-## 7. 合并表达矩阵
+## 8. 合并表达矩阵
 
-合并单个样本的表达量数据为一个基因表达量矩阵
+这里就是将下面的这种表合并为一张表，作为一个整体输入到后续分析的程序中
+
+```
+      样本1 |        样本2 |       样本3
+基因1   x   | 基因1    x   | 基因1   x
+基因2   x   | 基因2    x   | 基因2   x
+基因3   x   | 基因3    x   | 基因3   x
+基因4   x   | 基因4    x   | 基因4   x
+```
+
+合并为
+
+```
+      样本1   样本2  样本3
+基因1   x      x      x
+基因2   x      x      x
+基因3   x      x      x
+基因4   x      x      x
+```
+
+下面使用`R`语言中的`merge`将表格合并
 
 ```bash
 rm(list=ls())
 setwd("~/project/rat/output/HTseq")
 
-source("http://bioconductor.org/biocLite.R")
-options(BioC_mirror="http://mirrors.ustc.edu.cn/bioc/")
-# 安装包
-biocLite("DESeq2")
+# 得到文件样本编号
+files <- list.files(".", "*.count")
+f_lists <- list()
+for(i in files){
+    prefix = gsub("(_\\w+)?\\.count", "", i, perl=TRUE)
+    f_lists[[prefix]] = i
+}
 
-setwd("~/project/rat/output/HTseq")
-id_list <- c("SRR2190795", "SRR2240182", "SRR2240183", "SRR2240184",
-             "SRR2240185", "SRR2240186", "SRR2240187", "SRR2240228")
-
+id_list <- names(f_lists)
 data <- list()
 count <- 0
 for(i in id_list){
   count <- count + 1
-  a <- read.table(paste(i,".count", sep = "", collapse = ""), sep="\t", col.names = c("gene_id",i))
+  a <- read.table(f_lists[[i]], sep="\t", col.names = c("gene_id",i))
   data[[count]] <- a
 }
 
 # 合并文件
-data_merge <- merge(
-                    merge(merge(data[[1]],data[[2]],by="gene_id"), merge(data[[3]],data[[4]], by="gene_id"),
-                          ,by="gene_id"),
-                    merge(merge(data[[5]],data[[6]],by="gene_id"), merge(data[[7]],data[[8]], by="gene_id"),
-                          ,by="gene_id"),
-              by="gene_id")
+data_merge <- data[[1]]
+for(i in seq(2, length(id_list))){
+    data_merge <- merge(data_merge, data[[i]],by="gene_id")
+}
+
 write.csv(data_merge, "merge.csv", quote = FALSE, row.names = FALSE)
 ```
 
-## 8. 差异表达分析
+## 9. 差异表达分析
 
 + 查看几个管家基因的表达量情况。
 
@@ -885,7 +1023,7 @@ cat merge.csv | grep -E "ENSRNOG00000018630|ENSRNOG00000034254"
 ENSRNOG00000018630,2821,8092,4810,5813,8320,4161,3426,3249
 ENSRNOG00000034254,5073,13386,5774,8791,16865,7583,4494,4860
 ```
-### 8.1 数据前处理
+### 9.1 数据前处理
 
 DESeq2包是基于原始的read的计数，这里不需要进行标准化
 进行分析
@@ -940,7 +1078,7 @@ row.names(countdata) <- name_replace
 ```
 到这里就得到了可以用于后续差异分析的数据了
 
-### 8.2 差异分析
+### 9.2 差异分析
 
 差异分析使用`DESeq2`包进行分析，这个对于输入的数据是原始的`read count`，所以上述经过`HTseq`的read计数之后的数据可以输入到`DESeq2`包中进行差异分析。
 
@@ -950,7 +1088,7 @@ row.names(countdata) <- name_replace
 > 2. **利用DESeq函数进行标准化处理**
 > 3. **用result函数来提取差异比较的结果**
 
-#### 安装包
+#### 9.2.1 安装包
 
 首先安装对应的R包
 
@@ -959,7 +1097,7 @@ row.names(countdata) <- name_replace
 source("https://bioconductor.org/biocLite.R")
 biocLite("DESeq2")
 ```
-#### 构建对象
+#### 9.2.2 构建对象
 
 这里说白了就是把数据导入到R中生成对应的数据结构，它的基本用法如下
 
@@ -991,10 +1129,6 @@ dds <- DESeqDataSetFromMatrix(countData = cts, colData = coldata, design= ~ batc
 
 | Run | BioSample | Sample name | Experiment | LoadDate | MBases | MBytes | health state | treatment |
 | --- | --- | --- | --- | --- | --- | --- | --- | --- |
-| [SRR2190795](https://www.ncbi.nlm.nih.gov/Traces/sra/?run=SRR2190795) | [SAMN03975625](https://www.ncbi.nlm.nih.gov/biosample/SAMN03975625) | AM95_3_4__DEN283_275_index2 | [SRX1140283](https://www.ncbi.nlm.nih.gov/sra/SRX1140283) | 2015-09-05 | 1,440 | 1,039 | Liver cirrhosis | DEN + AM095 |
-| [SRR2240182](https://www.ncbi.nlm.nih.gov/Traces/sra/?run=SRR2240182) | [SAMN03975626](https://www.ncbi.nlm.nih.gov/biosample/SAMN03975626) | AM95_5__DEN284_index4 | [SRX1180447](https://www.ncbi.nlm.nih.gov/sra/SRX1180447) | 2015-09-07 | 2,337 | 1,682 | Liver cirrhosis | DEN + AM095 |
-| [SRR2240183](https://www.ncbi.nlm.nih.gov/Traces/sra/?run=SRR2240183) | [SAMN03975627](https://www.ncbi.nlm.nih.gov/biosample/SAMN03975627) | AM63_1_3__DEN265_285_index5 | [SRX1182152](https://www.ncbi.nlm.nih.gov/sra/SRX1182152) | 2015-09-07 | 1,680 | 1,214 | Liver cirrhosis | DEN + AM063 |
-| [SRR2240184](https://www.ncbi.nlm.nih.gov/Traces/sra/?run=SRR2240184) | [SAMN03975628](https://www.ncbi.nlm.nih.gov/biosample/SAMN03975628) | AM63_4_5__DEN261_282_index6 | [SRX1182155](https://www.ncbi.nlm.nih.gov/sra/SRX1182155) | 2015-09-07 | 1,886 | 1,371 | Liver cirrhosis | DEN + AM063 |
 | [SRR2240185](https://www.ncbi.nlm.nih.gov/Traces/sra/?run=SRR2240185) | [SAMN03975629](https://www.ncbi.nlm.nih.gov/biosample/SAMN03975629) | DEN_1_2__DEN251_255_index7 | [SRX1182156](https://www.ncbi.nlm.nih.gov/sra/SRX1182156) | 2015-09-07 | 2,195 | 1,590 | Liver cirrhosis | DEN |
 | [SRR2240186](https://www.ncbi.nlm.nih.gov/Traces/sra/?run=SRR2240186) | [SAMN03975630](https://www.ncbi.nlm.nih.gov/biosample/SAMN03975630) | DEN_4_5__DEN24_59_index12 | [SRX1182158](https://www.ncbi.nlm.nih.gov/sra/SRX1182158) | 2015-09-07 | 1,128 | 815 | Liver cirrhosis | DEN |
 | [SRR2240187](https://www.ncbi.nlm.nih.gov/Traces/sra/?run=SRR2240187) | [SAMN03975631](https://www.ncbi.nlm.nih.gov/biosample/SAMN03975631) | PBS_1_2__PBS8_9_index13 | [SRX1182166](https://www.ncbi.nlm.nih.gov/sra/SRX1182166) | 2015-09-07 | 1,861 | 1,342 | Healthy control | PBS |
@@ -1002,15 +1136,11 @@ dds <- DESeqDataSetFromMatrix(countData = cts, colData = coldata, design= ~ batc
 
 这个表格说明了样本`ID`及其处理的情况，可以看到就是`treatment`那一栏不一样，下面针对
 
-表达数据已经有了，下面是写一下实验组与对照组的信息，打开命令，定位到相应位置
+表达数据已经有了，下面是写一下实验组与对照组的信息，打开终端，`cd`到相应位置
 
 ```bash
 cat <<EOF >./phenotype/phenotype.csv
-"ids","health state","condition","treatment"
-"SRR2190795","Liver cirrhosis","DEN + AM095","treatment"
-"SRR2240182","Liver cirrhosis","DEN + AM095","treatment"
-"SRR2240183","Liver cirrhosis","DEN + AM063","treatment"
-"SRR2240184","Liver cirrhosis","DEN + AM063","treatment"
+"ids","state","condition","treatment"
 "SRR2240185","Liver cirrhosis","DEN","treatment"
 "SRR2240186","Liver cirrhosis","DEN","treatment"
 "SRR2240187","Healthy control","PBS","control"
@@ -1046,14 +1176,73 @@ colnames(8): SRR2190795 SRR2240182 ... SRR2240187 SRR2240228
 colData names(4): ids health.state condition treatment
 ```
 
-#### 差异基因
+#### 9.2.3 样本相关性
+
+因为存在很多基因的差别等因素，在某些基因上可能样本间几乎没有差别，但是总体来看就会有较大差别了，这里对包含众多的基因这样的因素的情况下进行样本相关性进行评估，评估样本的重复组之间是否很相似或者是否实验组与对照组之间差别明显。
+
++ PCA分析(principal components analysis)
+
+由于上面得到的是最原始的`read count`，但是PCA分析需要对数据进行转化才能进行。一般取对数，但是最原始的数据中有些基因的计数为`0`，这样在取`log`值的时候意味着`−∞`，这样是不行的，所以一般会加上一个常数再取`log`，也就是`log(count + N)`（其中`N`是一个常数），但是也有较好的方法来进行校正，比如`DEseq2`包自带的`vst`函数，全名为[`variance stabilizing transformation`](https://en.wikipedia.org/wiki/Variance-stabilizing_transformation)，它消除了方差对均值的依赖，尤其是低均值时的高`log counts`的变异。
+
+```R
+# 接续着上面的构建得到的dds对象
+# DEseq2包提供了相应的函数
+vsdata <- vst(dds, blind=FALSE)
+# intgroup 分组
+plotPCA(vsdata, intgroup="treatment")
+```
+
+![](./pic/PCA_analysis.png)
+
+距离越近相关性越大，否则越远，如果点单独的偏离，那么这个样本可能不好用。
+
++ sample-to-sample distances热图
+
+上述的转换数据还可以做样本聚类热图，用`dist`函数来获得sample-to-sample距离，距离矩阵热图中可以清楚看到samples之间的相似与否
+
+```R
+library("RColorBrewer")
+# 得到数据对象中基因的计数的转化值
+gene_data_transform <- assay(vsdata)
+# 使用t()进行转置
+# 使用dist方法求样本之间的距离
+sampleDists <- dist(t(gene_data_transform))
+# 转化为矩阵用于后续pheatmap()方法的输入
+sampleDistMatrix <- as.matrix(sampleDists)
+# 将矩阵的名称进行修改
+rownames(sampleDistMatrix) <- paste(vsdata$treatment, vsdata$condition, vsdata$ids, sep="-")
+colnames(sampleDistMatrix) <- paste(vsdata$treatment, vsdata$condition, vsdata$ids, sep="-")
+# 设置色盘
+colors <- colorRampPalette( rev(brewer.pal(9, "Blues")) )(255)
+# 绘制热图与聚类
+pheatmap(sampleDistMatrix,
+         clustering_distance_rows=sampleDists,
+         clustering_distance_cols=sampleDists,
+         col=colors)
+```
+
+![](./pic/sample_distance.png)
+
+可以看到样本与样本之间的距离，颜色越深，距离越近。
+
+> 如果实验组与对照组之间差别不明显，那么后续的分析结果就需要考虑一下。另外如果重复之间差异较大，那么在后续分析的时候就需要谨慎考虑了偏离的组别是否能被用于后续分析了
+
+#### 9.2.4 差异基因
+
++ 使用`DESeq()`方法计算不同组别间的基因的表达差异，它的输入是上一步构建的`dss`数据对象
 
 ```R
 # 基于统计学方法进行计算
 dds <- DESeq(dds)
 ```
 
-输出
+输出，下面的输出的说明了分析的过程
+
+> 1. 估计样本大小（消除测序深度的影响）
+>
+> 2. 对每一个基因的表达量的离散度做计算
+>
+> 3. 拟合广义的线性模型（generalized linear model）
 
 ```
 estimating size factors
@@ -1147,7 +1336,7 @@ dir.create("../DESeq2")
 write.csv(result_order, file="../DESeq2/results.csv")
 ```
 
-## 9. 提取差异表达基因
+## 10. 提取差异表达基因
 
 ### 名词解释
 
@@ -1171,10 +1360,11 @@ dim(diff_gene)
 + 把差异基因写入到文件中
 
 ```
+dir.create("../DESeq2/")
 write.csv(diff_gene, file="../DESeq2/difference.csv")
 ```
 
-## 10. 差异表达基因注释
+## 11. 差异表达基因注释
 
 ### 使用Y叔的`ClusterProfiler`对基因的ID进行
 
@@ -1240,7 +1430,7 @@ diff_gene_symbols <- merge(diff_gene_dataframe, rat_symbols, by = c("ensembl_gen
 write.csv(result_order, file="../DESeq2/difference_symbols.csv")
 ```
 
-## 11. 数据可视化
+## 13. 数据可视化
 
 + MA图
 
@@ -1248,12 +1438,16 @@ write.csv(result_order, file="../DESeq2/difference_symbols.csv")
 > M表示log fold change，衡量基因表达量变化，上调还是下调。A表示每个基因的count的均值。根据summary可知，low count的比率很高，所以大部分基因表达量不高，也就是集中在0的附近（log2(1)=0，也就是变化1倍）.提供了模型预测系数的分布总览。
 
 ```R
-plotMA(result_order, ylim=c(-2,2))
+plotMA(result_order, ylim=c(-10,10))
 ```
 
+## 14. 富集分析
+
+这里可以使用一个在线网站
 
 
-## 12. 富集分析
+
+
 
 ## ========================================
 
@@ -1478,10 +1672,13 @@ biocLite("dplyr")
 + [Y大宽 - RNA-seq(8): 探索分析结果:Data visulization](https://www.jianshu.com/p/807cf4a969fb)
 + [Dawn_天鹏 - 转录组学习三（数据质控）](https://www.jianshu.com/p/bacb86c78b43)
 + [Dawn_天鹏 - 转录组学习七（差异基因分析）](https://www.jianshu.com/p/26511d3360c8)
-
++ [RNA-seq workflow: gene-level exploratory analysis and differential expression](https://master.bioconductor.org/packages/release/workflows/vignettes/rnaseqGene/inst/doc/rnaseqGene.html)
 
 + [RNAseq-workflow](https://github.com/twbattaglia/RNAseq-workflow)
 
+### 结果解读
+
++ [RNA-seq结果怎么才能看懂?答案全在这些图里---（2）基础分析结果篇](http://www.360doc.com/content/18/0307/18/45848444_735176770.shtml)
 
 ### 程序下载安装
 
@@ -1512,4 +1709,3 @@ biocLite("dplyr")
 + **A: [Removing PCR duplicates in RNA-seq Analysis](https://bioinformatics.stackexchange.com/questions/2282/removing-pcr-duplicates-in-rna-seq-analysis)**
 
 + **A: [《The impact of amplification on differential expression analyses by RNA-seq》](https://www.nature.com/articles/srep25533)**
-
