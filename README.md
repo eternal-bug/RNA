@@ -1,6 +1,3 @@
----
-style: ocean
----
 
 # RNA-seq分析
 
