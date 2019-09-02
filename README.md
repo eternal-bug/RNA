@@ -1221,7 +1221,7 @@ pheatmap(sampleDistMatrix,
          col=colors)
 ```
 
-![](./pic/sample_distance.png)
+![](./pic/sample_distance_heatmap.png)
 
 可以看到样本与样本之间的距离，颜色越深，距离越近。
 
