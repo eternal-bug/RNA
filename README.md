@@ -1480,8 +1480,6 @@ biocLite("dplyr")
 + [Dawn_天鹏 - 转录组学习七（差异基因分析）](https://www.jianshu.com/p/26511d3360c8)
 
 
-
-+ [Y叔RNAseq-workflow](https://github.com/twbattaglia/RNAseq-workflow)
 + [RNAseq-workflow](https://github.com/twbattaglia/RNAseq-workflow)
 
 
