@@ -929,7 +929,39 @@ Multiseed full-index search: 00:18:59
 Time searching: 00:19:25
 Overall time: 00:19:42
 ```
+
 日志信息中说到了比对花费的时间以及比对情况。这里可以看到`91.00%`的比对率，比率还可以。
+
++ 总结比对情况
+
+```bash
+cd cd ~/project/rat/output/align
+file_list=($(ls *.log))
+
+echo -e "sample\tratio\ttime"
+for i in ${file_list[@]};
+do
+    prefix=$(echo ${i} | perl -p -e 's/\.log//')
+    echo -n -e "${prefix}\t"
+    cat ${i} |
+      grep -E "(overall alignment rate)|(Overall time)" |
+      perl -n -e '
+        if(m/alignment/){
+          $hash{precent} = $1 if m/([\d.]+)%/;
+        }elsif(m/time/){
+          if(m/(\d\d):(\d\d):(\d\d)/){
+            my $time = $1 * 60 + $2 + $3 / 60;
+            $hash{time} = $time;
+          }
+        }
+        END{
+          $hash{precent} = "NA" if not exists $hash{precent};
+          $hash{time} = "NA" if not exists $hash{time};
+          print "$hash{precent}\t$hash{time}\n";
+        }
+      '
+done
+```
 
 + 格式转化与排序
 
