@@ -1774,14 +1774,18 @@ biocLite("dplyr")
 
 **Q：How to deal with MSTRG tag without relevant gene name?**
 
-+ **A：[Question: How to deal with MSTRG tag without relevant gene name?](https://www.biostars.org/p/282817/)** - 在用stringtie的时候后续合并完成会生成`MSTRG`标签的基因名，怎么解决
+  + **A：[Question: How to deal with MSTRG tag without relevant gene name?](https://www.biostars.org/p/282817/)** - 在用stringtie的时候后续合并完成会生成`MSTRG`标签的基因名，怎么解决
 
 **Q：RNA-seq应该去除PCR重复吗？**
 
-+ **A: [Should I remove PCR duplicates from my RNA-seq data?](https://dnatech.genomecenter.ucdavis.edu/faqs/should-i-remove-pcr-duplicates-from-my-rna-seq-data/)**
+  + **A: [Should I remove PCR duplicates from my RNA-seq data?](https://dnatech.genomecenter.ucdavis.edu/faqs/should-i-remove-pcr-duplicates-from-my-rna-seq-data/)**
 
-+ **A: [The trouble with PCR duplicates](https://www.molecularecologist.com/2016/08/the-trouble-with-pcr-duplicates/)**
+  + **A: [The trouble with PCR duplicates](https://www.molecularecologist.com/2016/08/the-trouble-with-pcr-duplicates/)**
 
-+ **A: [Removing PCR duplicates in RNA-seq Analysis](https://bioinformatics.stackexchange.com/questions/2282/removing-pcr-duplicates-in-rna-seq-analysis)**
+  + **A: [Removing PCR duplicates in RNA-seq Analysis](https://bioinformatics.stackexchange.com/questions/2282/removing-pcr-duplicates-in-rna-seq-analysis)**
 
-+ **A: [《The impact of amplification on differential expression analyses by RNA-seq》](https://www.nature.com/articles/srep25533)**
+  + **A: [《The impact of amplification on differential expression analyses by RNA-seq》](https://www.nature.com/articles/srep25533)**
+
+**Q： DEseq2在进行差异分析时，组别之间重复数量不一样可以进行比较吗？**
+
+  + **A：[Question: Deseq2 Etc. Unequal Sample Sizes](https://www.biostars.org/p/90421/)**
