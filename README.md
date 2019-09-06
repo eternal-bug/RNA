@@ -935,7 +935,7 @@ Overall time: 00:19:42
 + 总结比对情况
 
 ```bash
-cd cd ~/project/rat/output/align
+cd ~/project/rat/output/align
 file_list=($(ls *.log))
 
 echo -e "sample\tratio\ttime"
@@ -957,7 +957,7 @@ do
         END{
           $hash{precent} = "NA" if not exists $hash{precent};
           $hash{time} = "NA" if not exists $hash{time};
-          print "$hash{precent}\t$hash{time}\n";
+          printf "%.2f\t%.2f\n", $hash{precent}, $hash{time};
         }
       '
 done
