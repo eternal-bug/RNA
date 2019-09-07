@@ -1821,3 +1821,7 @@ biocLite("dplyr")
 **Q： DEseq2在进行差异分析时，组别之间重复数量不一样可以进行比较吗？**
 
   + **A：[Question: Deseq2 Etc. Unequal Sample Sizes](https://www.biostars.org/p/90421/)**
+
+**Q：RNA-seq多少个重复比较合适？**
+  
+  + **A：[RNA测序中多少生物学重复合适](http://www.sohu.com/a/248181085_769248)** - 出于科研经费和实验结果准确性的综合考虑，RNA测序中每组至少使用6个生物学重复。若实验目的是鉴定所有倍数变化的差异基因，至少需要12个生物学重复。
