@@ -1137,14 +1137,6 @@ DESeq2包是基于原始的read的计数，这里不需要进行标准化
 进行分析
 
 ```R
-
-source("http://bioconductor.org/biocLite.R")
-options(BioC_mirror="http://mirrors.ustc.edu.cn/bioc/")
-
-# 安装包
-biocLite("DESeq2")
-
-library("DESeq2")
 dataframe <- read.csv("merge.csv", header=TRUE, row.names = 1)
 ```
 在数据中存在总结的项，这些项对于后续分析有影响，这里删除掉
@@ -1196,20 +1188,34 @@ row.names(countdata) <- name_replace
 > 2. **利用DESeq函数进行标准化处理**
 > 3. **用result函数来提取差异比较的结果**
 
-#### 9.2.1 安装包
+#### 9.2.1 安装与加载包
 
 首先安装对应的R包
 
 ```R
 # 使用bioconductor进行安装
-source("https://bioconductor.org/biocLite.R")
+source("http://bioconductor.org/biocLite.R")
+options(BioC_mirror="http://mirrors.ustc.edu.cn/bioc/")
+
+# 安装包
 biocLite("DESeq2")
+biocLite("pheatmap")
+biocLite("biomaRt")
+biocLite("org.Rn.eg.db")
+biocLite("clusterProfiler")
+
+# 加载
+library(DESeq2)
+library(pheatmap)
+library(biomaRt)
+library(org.Rn.eg.db)
+library(clusterProfiler)
 ```
 #### 9.2.2 构建对象
 
-这里说白了就是把数据导入到R中生成对应的数据结构，它的基本用法如下
+这里说白了就是把数据导入到R中生成对应的数据结构，它的基本用法如下：
 
-```
+```R
 dds <- DESeqDataSetFromMatrix(countData = cts, colData = coldata, design= ~ batch + condition)
 ```
 + `countData（表达矩阵）`：是上面一步生成的一个数据框（列对应着每一个样本，行对应的基因名称，中间的值是read的计数），类似于下面的
@@ -1266,6 +1272,8 @@ countdata
 coldata <- read.table("../phenotype/phenotype.csv", row.names = 1, header = TRUE, sep = "," )
 # 确认一下行列名是否有（不是简单的数值）
 head(coldata)
+# 调整数据顺序
+countdata <- countdata[row.names(coldata)]
 
 # 构建dds对象
 dds <- DESeqDataSetFromMatrix(countData = countdata, colData = coldata, design= ~ treatment)
@@ -1311,6 +1319,7 @@ plotPCA(vsdata, intgroup="treatment")
 上述的转换数据还可以做样本聚类热图，用`dist`函数来获得sample-to-sample距离，距离矩阵热图中可以清楚看到samples之间的相似与否
 
 ```R
+# 颜色管理包（不是必须）
 library("RColorBrewer")
 # 得到数据对象中基因的计数的转化值
 gene_data_transform <- assay(vsdata)
@@ -1342,6 +1351,9 @@ pheatmap(sampleDistMatrix,
 + 使用`DESeq()`方法计算不同组别间的基因的表达差异，它的输入是上一步构建的`dss`数据对象
 
 ```R
+# 改变样本组别顺序
+dds$treatment <- factor(as.vector(dds$treatment), levels = c("control","treatment"))
+
 # 基于统计学方法进行计算
 dds <- DESeq(dds)
 ```
@@ -1445,7 +1457,7 @@ FALSE  TRUE
 ```R
 # 新建文件夹
 dir.create("../DESeq2")
-write.csv(result_order, file="../DESeq2/results.csv")
+write.csv(result, file="../DESeq2/results.csv")
 ```
 
 ## 10. 提取差异表达基因
@@ -1828,5 +1840,6 @@ biocLite("dplyr")
   + **A：[Question: Deseq2 Etc. Unequal Sample Sizes](https://www.biostars.org/p/90421/)**
 
 **Q：RNA-seq多少个重复比较合适？**
-  
+
   + **A：[RNA测序中多少生物学重复合适](http://www.sohu.com/a/248181085_769248)** - 出于科研经费和实验结果准确性的综合考虑，RNA测序中每组至少使用6个生物学重复。若实验目的是鉴定所有倍数变化的差异基因，至少需要12个生物学重复。
+
