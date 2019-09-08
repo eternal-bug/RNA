@@ -1354,6 +1354,8 @@ dds <- DESeq(dds)
 >
 > 3. 拟合广义的线性模型（generalized linear model）
 
+使用的`Wald test`
+
 ```
 estimating size factors
 estimating dispersions
