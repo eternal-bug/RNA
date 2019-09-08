@@ -1262,8 +1262,10 @@ EOF
 # 刚才countdata已经得到
 countdata
 
-# 读取样本分组信息
-coldata <- read.table("../phenotype/phenotype.csv", header = TRUE, sep = "," )
+# 读取样本分组信息(注意，需要加上row.names = 1, header = TRUE，将行列名需要看好)
+coldata <- read.table("../phenotype/phenotype.csv", row.names = 1, header = TRUE, sep = "," )
+# 确认一下行列名是否有（不是简单的数值）
+head(coldata)
 
 # 构建dds对象
 dds <- DESeqDataSetFromMatrix(countData = countdata, colData = coldata, design= ~ treatment)
