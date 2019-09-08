@@ -1785,6 +1785,7 @@ biocLite("dplyr")
 + [RNA-seq workflow: gene-level exploratory analysis and differential expression](https://master.bioconductor.org/packages/release/workflows/vignettes/rnaseqGene/inst/doc/rnaseqGene.html)
 
 + [RNAseq-workflow](https://github.com/twbattaglia/RNAseq-workflow)
++ [DESeq2分析转录组之预处理+差异分析](https://www.jianshu.com/p/309c35fa6c7f)
 
 ### 结果解读
 
