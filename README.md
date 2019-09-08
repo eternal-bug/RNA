@@ -1567,11 +1567,77 @@ plotMA(result_order, ylim=c(-10,10))
 
 ## 14. 富集分析
 
-这里可以使用一个在线网站
++ 使用`clusterProfiler`进行富集分析
+
+```R
+# 接续着上面的结果
+ensembl_gene_id <- row.names(diff_gene)
+
+# 得到symbol
+rat_symbols <- getBM(attributes=c("ensembl_gene_id","external_gene_name","entrezgene_id", "description"), filters = 'ensembl_gene_id', values = ensembl_gene_id, mart = mart)
+diff_gene_ensembl_id <- rat_symbols$ensembl_gene_id
+```
+
+### 14.1 `Gene Ontology (GO)`分析
+
++ GO的三大类
+
+| 类别                    | 说明     |
+| ----------------------- | -------- |
+| molecular function (MF) | 分子功能 |
+| biological process (BP) | 生物过程 |
+| cellular component (CC) | 细胞组成 |
+
+在`clusterProfiler`包中有`enrichGO`方法就是用来进行GO富集的
+
+```react
+enrichGO     GO Enrichment Analysis of a gene set. Given a vector of genes, this
+             function will return the enrichment GO categories after FDR control.
+Usage:
+  enrichGO(gene, OrgDb, keyType = "ENTREZID", ont = "MF", pvalueCutoff = 0.05, 
+           pAdjustMethod = "BH", universe, qvalueCutoff = 0.2, minGSSize = 10, 
+           maxGSSize = 500, readable = FALSE, pool = FALSE)
+Arguments:
+  gene                 a vector of entrez gene id.
+  OrgDb                OrgDb
+  keyType              keytype of input gene
+  ont                  One of "MF", "BP", and "CC" subontologies or 'ALL'.
+  pvalueCutoff         Cutoff value of pvalue.
+  pAdjustMethod        one of "holm", "hochberg", "hommel", "bonferroni", "BH", "BY", "fdr", "none"
+  universe             background genes
+  qvalueCutoff         qvalue cutoff
+  minGSSize            minimal size of genes annotated by Ontology term for testing.
+  maxGSSize            maximal size of genes annotated for testing
+  readable             whether mapping gene ID to gene Name
+  pool                 If ont=’ALL’, whether pool 3 GO sub-ontologies
+```
+
+| 参数          | 说明                                                         |
+| ------------- | ------------------------------------------------------------ |
+| gene          | 差异基因对应的向量                                           |
+| keyType       | 指定的gene的ID类型，一般都用ENTREZID，该参数的取值可以参考`keytypes(org.Hs.eg.db)`的结果 |
+| OrgDb         | 该物种对应的org包的名字                                      |
+| ont           | 代表GO的3大类别，`BP`, `CC`, `MF`                            |
+| pAdjustMethod | 指定多重假设检验矫正的方法                                   |
+| pvalueCutoff  | 对应的阈值                                                   |
+| qvalueCutoff  | 对应的阈值                                                   |
+
+参数需要指定正确，特别是`OrgDb`。
+
++ 开始GO分析
 
 
+```R
+ego_bp<-enrichGO(gene       = rat_symbols$entrezgene_id,
+                 OrgDb      = org.Rn.eg.db,
+                 keyType    = 'ENSEMBL',
+                 ont        = "BP",
+                 pAdjustMethod = "BH",
+                 pvalueCutoff = 0.01,
+                 qvalueCutoff = 0.05)
+```
 
-
+### 另外可以使用一个在线网站
 
 ## ========================================
 
