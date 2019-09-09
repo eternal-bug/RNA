@@ -1329,8 +1329,8 @@ sampleDists <- dist(t(gene_data_transform))
 # 转化为矩阵用于后续pheatmap()方法的输入
 sampleDistMatrix <- as.matrix(sampleDists)
 # 将矩阵的名称进行修改
-rownames(sampleDistMatrix) <- paste(vsdata$treatment, vsdata$condition, vsdata$ids, sep="-")
-colnames(sampleDistMatrix) <- paste(vsdata$treatment, vsdata$condition, vsdata$ids, sep="-")
+# rownames(sampleDistMatrix) <- paste(vsdata$treatment, vsdata$condition, vsdata$ids, sep="-")
+# colnames(sampleDistMatrix) <- paste(vsdata$treatment, vsdata$condition, vsdata$ids, sep="-")
 # 设置色盘
 colors <- colorRampPalette( rev(brewer.pal(9, "Blues")) )(255)
 # 绘制热图与聚类
