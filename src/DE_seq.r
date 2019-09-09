@@ -117,5 +117,5 @@ compare_samples( list(samples=c("NH", "LHA1", "LHA2", "LHA3"), levels = c("HC","
 compare_samples( list(samples=c("NH", "LHB1", "LHB2"        ), levels = c("HC","H2"), dir = "../stat/HB") )
 compare_samples( list(samples=c("NH", "LHC1", "LHC2", "LHC3"), levels = c("HC","H3"), dir = "../stat/HC") )
 compare_samples( list(samples=c("NM", "LMA1", "LMA2", "LMA3"), levels = c("MC","M1"), dir = "../stat/MA") )
-compare_samples( list(samples=c("NH", "LMB1", "LMB2", "LMB3"), levels = c("MC","M2"), dir = "../stat/MB") )
-compare_samples( list(samples=c("NH", "LMC1", "LHC2"        ), levels = c("MC","M3"), dir = "../stat/MC") )
+compare_samples( list(samples=c("NM", "LMB1", "LMB2", "LMB3"), levels = c("MC","M2"), dir = "../stat/MB") )
+compare_samples( list(samples=c("NM", "LMC1", "LHC2"        ), levels = c("MC","M3"), dir = "../stat/MC") )
