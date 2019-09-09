@@ -52,7 +52,7 @@ pheatmap(sampleDistMatrix,
 compare_samples <- function(args_list){
     # args
     samples = args_list[["samples"]]
-    levels = args_list[["leves"]]
+    levels = args_list[["levels"]]
     dir    = args_list[["dir"]]
 
     # data sampling
@@ -79,8 +79,8 @@ compare_samples <- function(args_list){
     ensembl_gene_id <- row.names(diff_gene)
 
     # id transform
-    rat_symbols <- getBM(attributes=c("ensembl_gene_id","external_gene_name","entrezgene_id", "description"),
-                         filters = 'ensembl_gene_id', values = ensembl_gene_id, mart = mart)
+    rat_symbols <- getBM(attributes = c("ensembl_gene_id","external_gene_name","entrezgene_id", "description"),
+                         filters = "ensembl_gene_id", values = ensembl_gene_id, mart = mart)
 
     # merge symbols to DE analysis data
     diff_gene$ensembl_gene_id <- ensembl_gene_id
