@@ -90,12 +90,28 @@ compare_samples <- function(args_list){
     diff_gene_symbols <- merge(diff_gene_dataframe, rat_symbols, by = c("ensembl_gene_id"))
 
     # write data into file
-    dir.create("../stat/LMC", recursive = TRUE)
-    write.table(result, "../stat/LMC/all_gene.tsv", sep="\t", quote = FALSE)
-    write.table(diff_gene_symbols, "../stat/LMC/diff_gene.tsv", row.names = F,sep="\t", quote = FALSE)
+    dir.create(dir, recursive = TRUE)
+    write.table(result, paste(dir, "/all_gene.tsv", sep = ""), sep="\t", quote = FALSE)
+    write.table(diff_gene_symbols, paste(dir, "/diff_gene.tsv", sep = ""), row.names = F,sep="\t", quote = FALSE)
 
     # enrichment analysis
-    
+    for(i in c("CC", "BP", "MF")){
+        ego <- enrichGO(gene          = rat_symbols$ensembl_gene_id,
+                        OrgDb         = org.Rn.eg.db,
+                        keyType       = 'ENSEMBL',
+                        ont           = i,
+                        pAdjustMethod = "BH",
+                        pvalueCutoff  = 0.01,
+                        qvalueCutoff  = 0.05)
+        pdf(paste(dir, "/", i, ".pdf", sep = ""))
+            dotplot(ego, showCategory = 30, title = paste("The GO ", i, " enrichment analysis", sep = ""))
+        dev.off()
+    }
 }
 
-compare_samples( list(samples=c("NH", "LHA1", "LHA2", "LHA3"), levels = c("NC","H1")) )
+compare_samples( list(samples=c("NH", "LHA1", "LHA2", "LHA3"), levels = c("NC","H1"), dir = "../stat/HA") )
+compare_samples( list(samples=c("NH", "LHB1", "LHB2"        ), levels = c("NC","H2"), dir = "../stat/HB") )
+compare_samples( list(samples=c("NH", "LHC1", "LHC2", "LHC3"), levels = c("NC","H3"), dir = "../stat/HC") )
+compare_samples( list(samples=c("NM", "LMA1", "LMA2", "LMA3"), levels = c("MC","M1"), dir = "../stat/MA") )
+compare_samples( list(samples=c("NH", "LMB1", "LMB2", "LMB3"), levels = c("MC","M2"), dir = "../stat/MB") )
+compare_samples( list(samples=c("NH", "LMC1", "LHC2"        ), levels = c("MC","M3"), dir = "../stat/MC") )
