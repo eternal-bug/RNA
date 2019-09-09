@@ -1551,8 +1551,38 @@ diff_gene_symbols <- merge(diff_gene_dataframe, rat_symbols, by = c("ensembl_gen
 + 将数据存储起来
 
 ```R
-write.csv(result_order, file="../DESeq2/difference_symbols.csv")
+write.table(result, "../stat/all_gene.tsv", sep="\t", quote = FALSE)
+write.table(diff_gene_symbols, "../stat/diff_gene.tsv", row.names = F,sep="\t", quote = FALSE)
 ```
+
++ 统计样本的差异基因
+
+```bash
+echo -e "sample\tnum" > all_samples.tsv
+for i in $(ls);
+do
+    if [ -d ${i} ];
+    then
+        prefix=$i
+        diff_num=$(cat $i/diff_gene.tsv | tail -n+2 | wc -l)
+        echo -e "${prefix}\t${diff_num}" >> all_samples.tsv
+    fi
+done
+```
+
+使用R绘图
+
+```R
+library(ggplot2)
+data <- read.table("all_samples.tsv", header = T)
+
+pdf("samples_diff_gene_num.pdf")
+  ggplot(data=data, aes(x=sample, y=num, fill=sample)) +
+  geom_bar(stat = "identity", position = "dodge") +
+  labs(x = "samples",y = "num",title = "different gene number")
+dev.off()
+```
+
 
 ## 13. 数据可视化
 
