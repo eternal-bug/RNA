@@ -108,8 +108,8 @@ compare_samples <- function(args_list){
                     pvalueCutoff  = 0.01,
                     qvalueCutoff  = 0.05)
     pdf(paste(dir, "/", i, ".pdf", sep = ""))
-        dotplot(ego, showCategory = 30, title = paste("The GO ", i, " enrichment analysis", sep = ""))
-    dev.off()
+        print(dotplot(ego, showCategory = 30, title = paste("The GO ", i, " enrichment analysis", sep = "")))
+    while (!is.null(dev.list()))  dev.off()
   }
 }
 
