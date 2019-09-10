@@ -1,3 +1,6 @@
+---
+style: ocean
+---
 
 # RNA-seq分析
 
@@ -11,6 +14,11 @@
 +   genome    : =======================================
 +   annotation:   |-gene1-|  |-gene2-|  |-gene3-|
 ```
+
+
+# RNA-seq分析
+
+## 0. 介绍
 
 + 分析流程的结构是(仿照[`Tom Battaglia`](https://github.com/twbattaglia))
 
@@ -997,11 +1005,9 @@ SRR2240184.sort.bam.bai SRR2240228.sort.bam.bai
 
 ## 7. 表达量统计
 
-![](./pic/read_map_and_count.png)
-
 使用HTSEQ-count - [htseq的使用方法和计算原理](https://htseq.readthedocs.io/en/master/count.html#)
 
-如何判断一个 reads 属于某个基因， htseq-count 提供了 union, intersection_strict,intersection_nonempty 3 种模型，如图（大多数情况下作者推荐用 union 模型）
+如何判断一个 reads 属于某个基因， htseq-count 提供了 union, intersection_strict,intersection_nonempty 3 种模型，如图（大多数情况下作者推荐用 union 模型），它描述了在多种情况下，比对到基因组上的read分配的问题，在这些问题中，最难分配的就是一条read在两个基因相交的地方比对上了之后的情况。一般情况下作者推荐使用`union`的方式。当然，除此之外
 
 ![](./pic/HTseq.png)
 
@@ -1113,6 +1119,19 @@ for(i in seq(2, length(id_list))){
 write.csv(data_merge, "merge.csv", quote = FALSE, row.names = FALSE)
 ```
 
++ 数据标准化
+
+![](./pic/read_map_and_count.png)
+
+得到的原始`read count`并不能体现出基因与基因之间的相对的表达量的关系，如上图所示，不同的基因的长度不同，那么对应的read比对到的区域的大小不同，如果在相同大小的区域内比对的read数量那么就可以进行直接比较，但是基因之间的长度不同这就带了**直接比落在基因上的read数量来说明表达量就是不公平的**，为了后续可能需要的实验验证，这里将数据进行一个标准化的计算。相关博文[RNA-Seq分析|RPKM, FPKM, TPM, 傻傻分不清楚？](http://www.360doc.com/content/18/0112/02/50153987_721216719.shtml)；[BBQ(生物信息基础问题35，36)：RNA-Seq 数据的定量之RPKM，FPKM和TPM](https://www.jianshu.com/p/30035cae4ee9)，这里还是使用FPKM来进行。
+
+```R
+library(GenomicFeatures)
+txdb <- makeTxDbFromGFF("rn6.gff",format="gff")
+exons_gene <- exonsBy(txdb, by = "gene")
+exons_gene_lens <- lapply(exons_gene,function(x){sum(width(reduce(x)))})
+```
+
 ## 9. 差异表达分析
 
 + 查看几个管家基因的表达量情况。
@@ -1131,13 +1150,21 @@ ENSRNOG00000034254,5073,13386,5774,8791,16865,7583,4494,4860
 ```
 ### 9.1 数据前处理
 
-DESeq2包是基于原始的read的计数，这里不需要进行标准化
-进行分析
-
 ```R
 dataframe <- read.csv("merge.csv", header=TRUE, row.names = 1)
 ```
-在数据中存在总结的项，这些项对于后续分析有影响，这里删除掉
+在数据中存在总结的项，这些项对于后续分析有影响，在HTseq-count的结果有5行总结的内容，分别是：
+
+| 项                     | 说明                                   |
+| ---------------------- | -------------------------------------- |
+| __alignment_not_unique | 比对到多个位置的reads数                |
+| __ambiguous            | 不能判断落在那个单位类型的reads数      |
+| __no_feature           | 不能对应到任何单位类型的reads数        |
+| __not_aligned          | 存在于SAM文件，但没有比对上的reads数   |
+| __too_low_aQual        | 低于-a设定的reads mapping质量的reads数 |
+
+
+这里删除掉
 
 ```
                        SRR2190795 SRR2240182 SRR2240183 SRR2240184
@@ -1155,16 +1182,6 @@ __not_aligned             1336922    1027748    1734828    1539988
 __too_low_aQual                 0          0          0          0
 ENSRNOG00000000001              6          2          0          0
 ```
-
-在HTseq-count的结果后面有5行总结的内容，分别是：
-
-| 项                     | 说明                                   |
-| ---------------------- | -------------------------------------- |
-| __alignment_not_unique | 比对到多个位置的reads数                |
-| __ambiguous            | 不能判断落在那个单位类型的reads数      |
-| __no_feature           | 不能对应到任何单位类型的reads数        |
-| __not_aligned          | 存在于SAM文件，但没有比对上的reads数   |
-| __too_low_aQual        | 低于-a设定的reads mapping质量的reads数 |
 
 
 ```R
@@ -1189,7 +1206,11 @@ row.names(countdata) <- name_replace
 
 ### 9.2 差异分析
 
-差异分析使用`DESeq2`包进行分析，这个对于输入的数据是原始的`read count`，所以上述经过`HTseq`的read计数之后的数据可以输入到`DESeq2`包中进行差异分析。
+差异分析使用`DESeq2`包进行分析，这个对于输入的数据是原始的`read count`，所以上述经过`HTseq`的read计数之后的数据可以输入到`DESeq2`包中进行差异分析。它与`EdgeR`包类似，都是基于负二项分布模型。在转录组分析中有三个分析的水平`基因水平(gene-level)`、`转录本水平(transcript-level)`、`外显子使用水平(exon-usage-level)`。但是原始的`read count`数量并不能代表基因的表达量。
+
+> 表达差异分析只对比不同样本之间的同一个转录本，所以不需要考虑转录本长度，只考虑总读段数。一个**最简单思想**就是，样本测序得到的总读段数（实际上是可以比对到转录组的总读段数）越多，则每个基因分配到的读段越多。因此**最简单的标准化因子**就是总读段数，用总读段数作标准化的前提是大部分基因的表达是非显著变化的，这与基因芯片中的基本假设相同。**但是**实际工作中发现很多情况下总读段数主要是一小部分大量表达的基因贡献的。Bullard等（2010）在比较了几种标准化方法的基础上发现在每个泳道内使用非零计数分布的上四分位数（Q75%）作为标准化因子是一种更稳健的选择，总体表现是所研究方法中最优的。
+>
+> Bioconductor的edgeR包和DESeq包分别提供了上四分位数和中位数来作为标准化因子，就是出于这个思想。[Bioconductor分析RNA-seq数据](https://www.jianshu.com/p/8f89284c16f8)
 
 + DESeq2的差异分析的步骤
 
@@ -1902,9 +1923,11 @@ biocLite("dplyr")
 + [Dawn_天鹏 - 转录组学习三（数据质控）](https://www.jianshu.com/p/bacb86c78b43) - fastqc结果解释的很好
 + [Dawn_天鹏 - 转录组学习七（差异基因分析）](https://www.jianshu.com/p/26511d3360c8)
 + [RNA-seq workflow: gene-level exploratory analysis and differential expression](https://master.bioconductor.org/packages/release/workflows/vignettes/rnaseqGene/inst/doc/rnaseqGene.html)
-
 + [RNAseq-workflow](https://github.com/twbattaglia/RNAseq-workflow)
 + [DESeq2分析转录组之预处理+差异分析](https://www.jianshu.com/p/309c35fa6c7f) - 样本对比关系设定
++ [Bioconductor分析RNA-seq数据](https://www.jianshu.com/p/8f89284c16f8)
++ [转录组入门(6)： reads计数](https://www.jianshu.com/p/e9742bbf83b9) - 转录组分析的三个水平
++ [Htseq Count To Fpkm](http://www.bioinfo-scrounger.com/archives/342) - 得到基因的外显子长度
 
 ### 结果解读
 
@@ -1947,4 +1970,3 @@ biocLite("dplyr")
 **Q：RNA-seq多少个重复比较合适？**
 
   + **A：[RNA测序中多少生物学重复合适](http://www.sohu.com/a/248181085_769248)** - 出于科研经费和实验结果准确性的综合考虑，RNA测序中每组至少使用6个生物学重复。若实验目的是鉴定所有倍数变化的差异基因，至少需要12个生物学重复。
-
