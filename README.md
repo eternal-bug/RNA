@@ -1182,9 +1182,11 @@ write.csv(data_merge, "merge.csv", quote = FALSE, row.names = FALSE)
 
 ![](./pic/read_map_and_count.png)
 
-得到的原始`read count`并不能体现出基因与基因之间的相对的表达量的关系。如上图所示，不同的基因的长度不同，那么对应的read比对到的区域的大小不同，如果在相同大小的区域内比对的read数量那么就可以进行直接比较，但是基因之间的长度不同这就带来了**直接比落在基因上的read数量来说明表达量就是不公平的**这种情况（就好比直接比两个人的体重来判定胖瘦一样），所以需要根据基因的长度来对原始的read count进行转化之后才能**公平**。
+得到的原始`read count`并不能体现出基因与基因之间的相对的表达量的关系。如上图所示，不同的基因的长度不同，那么对应的read比对到的区域的大小不同，如果在相同大小的区域内比对的read数量那么就可以进行直接比较，但是基因之间的长度不同这就带来了**直接比落在基因上的read数量来说明表达量就是不公平的**这种情况（就好比直接比一个100斤的6-7岁的小胖子和110斤的成年人一样，不考虑身高因素这种是没有意义的），所以需要根据基因的长度来对原始的read count进行转化之后才能**公平**。
 
-但是其实这个只是为了分析基因的差异，其实在对测序深度进行标准化之后就可以直接对不同样本同一个基因之间的read count数进行比较，因为并不涉及到一个样本内不同基因的对比。为了后续可能需要的QPCR实验验证，这里将数据进行一个标准化的计算。相关博文[RNA-Seq分析|RPKM, FPKM, TPM, 傻傻分不清楚？](http://www.360doc.com/content/18/0112/02/50153987_721216719.shtml)；[BBQ(生物信息基础问题35，36)：RNA-Seq 数据的定量之RPKM，FPKM和TPM](https://www.jianshu.com/p/30035cae4ee9)，但是目前存在争议究竟是使用`FPKM`还是`TPM`的问题，这里还是沿用之前的`FPKM`来进行，但是目前也有很多采用了`TPM`。
+但是其实这个只是为了分析基因的差异，其实在对测序深度进行标准化之后就可以直接对不同样本同一个基因之间的read count数进行比较，因为并不涉及到一个样本内不同基因的对比。为了后续可能需要的QPCR实验验证，这里将数据进行一个标准化的计算。相关博文[RNA-Seq分析|RPKM, FPKM, TPM, 傻傻分不清楚？](http://www.360doc.com/content/18/0112/02/50153987_721216719.shtml)；[BBQ(生物信息基础问题35，36)：RNA-Seq 数据的定量之RPKM，FPKM和TPM](https://www.jianshu.com/p/30035cae4ee9)，但是目前存在争议究竟是使用`FPKM`还是`TPM`的问题，这里对两种方法都进行计算。
+
++ 首先得到相关基因的长度信息
 
 ```R
 library(GenomicFeatures)
@@ -1192,6 +1194,8 @@ txdb <- makeTxDbFromGFF("rn6.gff",format="gff")
 exons_gene <- exonsBy(txdb, by = "gene")
 exons_gene_lens <- lapply(exons_gene,function(x){sum(width(reduce(x)))})
 ```
+
++ 然后根据公式计算
 
 ## 9. 差异表达分析
 
