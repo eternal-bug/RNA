@@ -1126,6 +1126,8 @@ ENSRNOG00000000033	27
 
 ## 8. 合并表达矩阵
 
+### 8.1 合并
+
 这里就是将下面的这种表合并为一张表，作为一个整体输入到后续分析的程序中
 
 ```
@@ -1178,24 +1180,64 @@ for(i in seq(2, length(id_list))){
 write.csv(data_merge, "merge.csv", quote = FALSE, row.names = FALSE)
 ```
 
-+ 数据标准化
+### 8.2 数据标准化
+
++ 表达量是个什么？
+
+在一个细胞中，如果统计某一个基因的表达得到的所有的RNA，这个数量就是**绝对的数量**，就是实际上有多少。但是在RNA-seq中，并不知道被用于测序的组织块有多少个细胞，另外提取RNA的过程中损失了多少，那么最后我们通过这个read count以及标准化之后得到的并不是真实的具体的数量，这个数量是**相对定量**，就是这个数值单独拿出来没有什么意义，但是在数据相互比较中才显示出意义来。
 
 ![](./pic/read_map_and_count.png)
 
-得到的原始`read count`并不能体现出基因与基因之间的相对的表达量的关系。如上图所示，不同的基因的长度不同，那么对应的read比对到的区域的大小不同，如果在相同大小的区域内比对的read数量那么就可以进行直接比较，但是基因之间的长度不同这就带来了**直接比落在基因上的read数量来说明表达量就是不公平的**这种情况（就好比直接比一个100斤的6-7岁的小胖子和110斤的成年人一样，不考虑身高因素这种是没有意义的），所以需要根据基因的长度来对原始的read count进行转化之后才能**公平**。
+
++ read count与相对表达量
+
+得到的原始`read count`并不能体现出基因与基因之间的相对的表达量的关系。如上图所示，不同的基因的长度不同，那么对应的read比对到的区域的大小不同，基因之间的长度不同这就带来了**直接比落在基因上的read数量来说明表达量就是不公平的**这种情况（就好比直接比两个人的体重来判定胖瘦一样，比如一个100斤的6-7岁的小胖子和110斤的成年人一样，不考虑身高因素这种关键是没有意义的），所以需要根据基因的长度来对原始的read count进行转化之后才能**公平**。
+
+![](./pic/child_adult.jpg)
 
 但是其实这个只是为了分析基因的差异，其实在对测序深度进行标准化之后就可以直接对不同样本同一个基因之间的read count数进行比较，因为并不涉及到一个样本内不同基因的对比。为了后续可能需要的QPCR实验验证，这里将数据进行一个标准化的计算。相关博文[RNA-Seq分析|RPKM, FPKM, TPM, 傻傻分不清楚？](http://www.360doc.com/content/18/0112/02/50153987_721216719.shtml)；[BBQ(生物信息基础问题35，36)：RNA-Seq 数据的定量之RPKM，FPKM和TPM](https://www.jianshu.com/p/30035cae4ee9)，但是目前存在争议究竟是使用`FPKM`还是`TPM`的问题，这里对两种方法都进行计算。
 
 + 首先得到相关基因的长度信息
 
 ```R
+# 这个脚本来自[Htseq Count To Fpkm](http://www.bioinfo-scrounger.com/archives/342)
 library(GenomicFeatures)
+
 txdb <- makeTxDbFromGFF("rn6.gff",format="gff")
+
 exons_gene <- exonsBy(txdb, by = "gene")
+
 exons_gene_lens <- lapply(exons_gene,function(x){sum(width(reduce(x)))})
 ```
 
 + 然后根据公式计算
+
+计算公式
+
+```
+************************
+RPKM = 10^6 * nr / L * N
+
+       RPKM: Reads Per Kilobase per Million
+       nr  : 比对至目标基因的read数量
+       L   : 目标基因的外显子长度之和除以1000(因此，要注意这里的L单位是kb，不是bp)
+       N   : 是总有效比对至基因组的read数量
+
+***********************************
+TPM = nr * read_l * 10^6 / g_l * T
+T   = ∑(nr * read_l / g_l)
+
+       TPM   : Transcripts Per Million
+       nr    : 比对至目标基因的read数量
+       read_l: 是比对至基因g的平均read长度
+       g_l   : 是基因g的外显子长度之和（这里无需将其除以1000，这是没必要的）
+```
+
+开始计算
+
+```
+
+```
 
 ## 9. 差异表达分析
 
