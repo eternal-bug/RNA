@@ -1026,8 +1026,6 @@ htseq-count [options] <alignment_files> <gff_file>
 | -q --quiet | 不输出程序运行的状态信息和警告信息。|
 | -h --help | 输出帮助信息。|
 
-
-
 ```bash
 cd ~/project/rat/output
 mkdir HTseq
@@ -1162,11 +1160,11 @@ ENSRNOG00000000001              6          2          0          0
 
 | 项                     | 说明                                   |
 | ---------------------- | -------------------------------------- |
-| __no_feature           | 不能对应到任何单位类型的reads数        |
-| __ambiguous            | 不能判断落在那个单位类型的reads数      |
-| __too_low_aQual        | 低于-a设定的reads mapping质量的reads数 |
-| __not_aligned          | 存在于SAM文件，但没有比对上的reads数   |
 | __alignment_not_unique | 比对到多个位置的reads数                |
+| __ambiguous            | 不能判断落在那个单位类型的reads数      |
+| __no_feature           | 不能对应到任何单位类型的reads数        |
+| __not_aligned          | 存在于SAM文件，但没有比对上的reads数   |
+| __too_low_aQual        | 低于-a设定的reads mapping质量的reads数 |
 
 
 ```R
