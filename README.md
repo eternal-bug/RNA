@@ -2100,6 +2100,10 @@ biocLite("dplyr")
 在这里发现了差异基因出现了`MSTRG`等名称。这个名称是在`stringtie`合并样本`gff`文件的时候产生的，后续差异分析之后不知道如何对应回去？
 
 
+## 作者
+
++ [eternal-bug](https://github.com/eternal-bug) - Zelda_legend@163.com
+
 ## 参考
 
 ### 流程
