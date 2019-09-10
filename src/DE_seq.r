@@ -6,12 +6,14 @@ biocLite("pheatmap")
 biocLite("biomaRt")
 biocLite("org.Rn.eg.db")
 biocLite("clusterProfiler")
+biocLite("factoextra")
 
 library(DESeq2)
 library(pheatmap)
 library(biomaRt)
 library(org.Rn.eg.db)
 library(clusterProfiler)
+library(factoextra)
 
 # data market
 mart <- useDataset("rnorvegicus_gene_ensembl", useMart("ENSEMBL_MART_ENSEMBL"))
@@ -33,13 +35,27 @@ dds = DESeqDataSetFromMatrix(countData = countdata, colData = coldata, design= ~
 # variance stabilizing transformation and not blind sample
 vsdata <- vst(dds, blind=FALSE)
 
-# PCA
+# ======== PCA ===========
 plotPCA(vsdata, intgroup="treatment")
 
-# distance
+# samples distance
 gene_data_transform <- assay(vsdata)
 # transposition and calculate distance
 sampleDists <- dist(t(gene_data_transform))
+
+# ====== hierarchical clustering ======
+res <- hcut(sampleDists, k = 2, stand = TRUE)
+# Visualize
+fviz_dend(res, 
+          rect = TRUE,
+          rect_border="cluster",
+          rect_lty=2,
+          lwd=0.5,
+          rect_fill = T,
+          cex = 0.5,
+          color_labels_by_k=T,
+          horiz=T)
+
 # transform matrix
 sampleDistMatrix <- as.matrix(sampleDists)
 # heatmap
