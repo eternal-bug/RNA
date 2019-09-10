@@ -2122,6 +2122,7 @@ biocLite("dplyr")
 + [Bioconductor分析RNA-seq数据](https://www.jianshu.com/p/8f89284c16f8)
 + [转录组入门(6)： reads计数](https://www.jianshu.com/p/e9742bbf83b9) - 转录组分析的三个水平
 + [Htseq Count To Fpkm](http://www.bioinfo-scrounger.com/archives/342) - 得到基因的外显子长度
++ [人人都要会的转录组(RNA-seq)下游分析](https://zhuanlan.zhihu.com/p/77901431)
 
 ### 结果解读
 
