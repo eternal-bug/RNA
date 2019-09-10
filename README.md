@@ -1158,6 +1158,17 @@ __too_low_aQual                 0          0          0          0
 ENSRNOG00000000001              6          2          0          0
 ```
 
+在HTseq-count的结果后面有5行总结的内容，分别是：
+
+| 项                     | 说明                                   |
+| ---------------------- | -------------------------------------- |
+| __no_feature           | 不能对应到任何单位类型的reads数        |
+| __ambiguous            | 不能判断落在那个单位类型的reads数      |
+| __too_low_aQual        | 低于-a设定的reads mapping质量的reads数 |
+| __not_aligned          | 存在于SAM文件，但没有比对上的reads数   |
+| __alignment_not_unique | 比对到多个位置的reads数                |
+
+
 ```R
 # 去除前面5行
 countdata <- dataframe[-(1:5),]
