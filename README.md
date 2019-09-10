@@ -1124,7 +1124,7 @@ ENSRNOG00000000024	843
 ENSRNOG00000000033	27
 ```
 
-## 8. 合并表达矩阵
+## 8. 合并表达矩阵与标准化
 
 ### 8.1 合并
 
@@ -1202,12 +1202,26 @@ write.csv(data_merge, "merge.csv", quote = FALSE, row.names = FALSE)
 ```R
 # 这个脚本来自[Htseq Count To Fpkm](http://www.bioinfo-scrounger.com/archives/342)
 library(GenomicFeatures)
-
-txdb <- makeTxDbFromGFF("rn6.gff",format="gff")
-
+# 构建Granges对象
+txdb <- makeTxDbFromGFF("rn6.gff" )
+# 查找基因的外显子
 exons_gene <- exonsBy(txdb, by = "gene")
+# 计算总长度
+# reduce()、width()是Irange对象的方法
+gene_len <- list()
+for(i in names(exons_gene)){
+    range_info = reduce(exons_gene[[i]])
+    width_info = width(range_info)
+    sum_len    = sum(width_info)
+    gene_len[[i]] = sum_len
+}
 
-exons_gene_lens <- lapply(exons_gene,function(x){sum(width(reduce(x)))})
+# 或者写为lapply的形式(快很多)
+gene_len <- lapply(exons_gene,function(x){sum(width(reduce(x)))})
+
+data <- t(as.data.frame(gene_len))
+# 写入文件
+write.table(data, file = "rn6_gene_len.tsv", row.names = TRUE, sep="\t", quote = FALSE, col.names = FALSE)
 ```
 
 + 然后根据公式计算
@@ -1215,28 +1229,93 @@ exons_gene_lens <- lapply(exons_gene,function(x){sum(width(reduce(x)))})
 计算公式
 
 ```
-************************
-RPKM = 10^6 * nr / L * N
++-------------------------------+
+| RPKM = (10^6 * nr) / (L * N)  |
++-------------------------------+
 
        RPKM: Reads Per Kilobase per Million
        nr  : 比对至目标基因的read数量
        L   : 目标基因的外显子长度之和除以1000(因此，要注意这里的L单位是kb，不是bp)
        N   : 是总有效比对至基因组的read数量
 
-***********************************
-TPM = nr * read_l * 10^6 / g_l * T
-T   = ∑(nr * read_l / g_l)
+
++------------------------------------+
+| TPM = nr * read_r * 10^6 / g_r * T |
+| T   = ∑(ni * read_i / g_i)         |
++------------------------------------+
+
+简言之
+
++--------------------------------------+
+| TPM = (nr / g_r) * 10^6 / ∑(ni / gi) |
++--------------------------------------+
 
        TPM   : Transcripts Per Million
        nr    : 比对至目标基因的read数量
-       read_l: 是比对至基因g的平均read长度
-       g_l   : 是基因g的外显子长度之和（这里无需将其除以1000，这是没必要的）
+       read_r: 是比对至基因r的平均read长度
+       g_r   : 是基因r的外显子长度之和（这里无需将其除以1000）
 ```
 
-开始计算
+开始计算`RPKM`
 
-```
+```R
+#!R
+# =========== RPKM =============
 
+gene_len_file <- "rn6_gene_len.tsv"
+count_file <- "samples.count"
+
+gene_len <- read.table(gene_len_file, header = FALSE, row.name = 1)
+colnames(gene_len) <- c("length")
+
+count <- read.table(count_file, header = FALSE, row.name = 1)
+colnames(count) <- c("count")
+# all read number
+all_count <- sum(count["count"])
+
+RPKM <- c()
+for(i in row.names(count)){
+    count_ = 0
+    exon_kb = 1
+    rpkm = 0
+    count_ = count[i, ]
+    exon_kb  = gene_len[i, ] / 1000
+    rpkm    = (10 ^ 6 * count_ ) / (exon_kb * all_count )
+    RPKM = c(RPKM, rpkm)
+}
+
+
+
+# =========== 计算TPM ============
+# 首先得到总的结果
+sum_ <- 0
+for(i in row.names(count)){
+    count_ = 0
+    exon = 1
+    count_ = count[i, ]
+    exon  = gene_len[i, ]
+    value = count_ / exon
+    if(is.na(value)){
+        print(paste(i, " is error! please check"))
+    }else{
+        sum_ = sum_ + value
+    }
+}
+
+TPM <- c()
+for(i in row.names(count)){
+    count_ = 0
+    exon = 1
+    count_ = count[i, ]
+    exon  = gene_len[i, ]
+    tpm = (10 ^ 6 * count_ / exon ) / sum_
+    TPM = c(TPM, tpm)
+}
+
+count["RPKM"] <- RPKM
+count["TPM"] <- TPM       
+           
+write.table(count, "123.normalize.count", col.names = TRUE, row.names = TRUE, sep="\t", quote = FALSE)
 ```
 
 ## 9. 差异表达分析
