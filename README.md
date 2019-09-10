@@ -1200,7 +1200,6 @@ write.csv(data_merge, "merge.csv", quote = FALSE, row.names = FALSE)
 + 首先得到相关基因的长度信息
 
 ```R
-# 这个脚本来自[Htseq Count To Fpkm](http://www.bioinfo-scrounger.com/archives/342)
 library(GenomicFeatures)
 # 构建Granges对象
 txdb <- makeTxDbFromGFF("rn6.gff" )
