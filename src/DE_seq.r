@@ -23,6 +23,9 @@ mart <- useDataset("rnorvegicus_gene_ensembl", useMart("ENSEMBL_MART_ENSEMBL"))
 raw.data <- read.csv("merge.csv", header=TRUE, row.names = 1)
 countdata <- raw.data[-(1:5),]
 
+# screen(discard all 0 count)
+countdata <- countdata[rowSums(countdata) > 0,]
+
 # phenotype data
 coldata <- read.table("../phenotype/phenotype.csv", row.names = 1, header = TRUE, sep = "," )
 countdata <- countdata[row.names(coldata)]
