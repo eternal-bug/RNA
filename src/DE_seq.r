@@ -1,6 +1,7 @@
 rm(list=ls())
 
 source ("https://bioconductor.org/biocLite.R")
+
 biocLite("DESeq2")
 biocLite("pheatmap")
 biocLite("biomaRt")
@@ -15,22 +16,24 @@ library(org.Rn.eg.db)
 library(clusterProfiler)
 library(factoextra)
 
-# data market
+# ======= preset data market =======
 mart <- useDataset("rnorvegicus_gene_ensembl", useMart("ENSEMBL_MART_ENSEMBL"))
 
+
+# ======= read raw data ========
 # row data and contain summary line
 # 1 to 5 line should be trim
 raw.data <- read.csv("merge.csv", header=TRUE, row.names = 1)
 countdata <- raw.data[-(1:5),]
 
-# screen(discard all 0 count)
+# === screen(discard all 0 count) ===
 countdata <- countdata[rowSums(countdata) > 0,]
 
 # phenotype data
 coldata <- read.table("../phenotype/phenotype.csv", row.names = 1, header = TRUE, sep = "," )
 countdata <- countdata[row.names(coldata)]
 
-# build dds object
+# ======= build dds object ========
 dds = DESeqDataSetFromMatrix(countData = countdata, colData = coldata, design= ~ treatment)
 
 # sample relation
@@ -61,13 +64,14 @@ fviz_dend(res,
 
 # transform matrix
 sampleDistMatrix <- as.matrix(sampleDists)
-# heatmap
+# ============ heatmap ===========
 pheatmap(sampleDistMatrix,
          clustering_distance_rows=sampleDists,
          clustering_distance_cols=sampleDists
 )
 
-# different sample
+# ======== samples compare =======
+
 compare_samples <- function(args_list){
   # args
   samples = args_list[["samples"]]
