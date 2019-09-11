@@ -918,7 +918,7 @@ $ parallel -j 4 "
 
 得到干净的测序数据之后，
 
-![](./pic/RNA-Seq-alignment.png)
+<img src="./pic/RNA-Seq-alignment.png" alt="Sample"  width="400">
 
 ### 6.1 建立索引
 
