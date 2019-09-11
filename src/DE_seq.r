@@ -139,7 +139,7 @@ compare_samples <- function(args_list){
         print(
           dotplot(ego, showCategory = 30,
                   title = paste("The GO ", i, " enrichment analysis", sep = "")) +
-          scale_y_discrete(labels = str_wrap(ego_bp@result$Description, width = 60)) + 
+          scale_y_discrete(labels = str_wrap(ego@result$Description, width = 60)) + 
           theme(axis.text.y = element_text(size = 8))
         )
     while (!is.null(dev.list())){
@@ -161,9 +161,9 @@ compare_samples <- function(args_list){
                    use_internal_data = FALSE)
   pdf(paste(dir, "/", "kegg_graph", ".pdf", sep = ""))
   print(
-    dotplot(ego, showCategory = 30,
+    dotplot(kk, showCategory = 30,
             title = "The KEGG enrichment analysis") +
-      scale_y_discrete(labels = str_wrap(ego_bp@result$Description, width = 60)) + 
+      scale_y_discrete(labels = str_wrap(kk@result$Description, width = 60)) + 
       theme(axis.text.y = element_text(size = 8))
   )
   while (!is.null(dev.list())){
