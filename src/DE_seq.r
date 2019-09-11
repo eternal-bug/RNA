@@ -84,13 +84,13 @@ compare_samples <- function(args_list){
   countdata_g = countdata[samples]
   dds = DESeqDataSetFromMatrix(countData = countdata_g, colData = coldata_g, design= ~ treatment)
   
-  dds$treatment <- factor(as.vector(dds$treatment), levels = levels)
+  dds$treatment = factor(as.vector(dds$treatment), levels = levels)
   
-  dds <- DESeq(dds)
+  dds = DESeq(dds)
   
   # result
-  result <- results(dds, pAdjustMethod = "fdr", alpha = 0.05)
-  result_order <- result[order(result$pvalue),]
+  result = results(dds, pAdjustMethod = "fdr", alpha = 0.05)
+  result_order = result[order(result$pvalue),]
   
   # print result info and 
   print("====> the order result summary.")
@@ -102,21 +102,21 @@ compare_samples <- function(args_list){
   # the Padj adjusted by FDR, and set threshold value to 0.05
   # set 1 as threshold value of log2FoldChange and FC is 2/1(^) or 1/2(v)
   print("====> the different genes summary.")
-  diff_gene <- subset(result_order, padj < 0.05 & abs(log2FoldChange) > 1)
+  diff_gene = subset(result_order, padj < 0.05 & abs(log2FoldChange) > 1)
   summary(diff_gene)
   # get gene id
-  ensembl_gene_id <- row.names(diff_gene)
+  ensembl_gene_id = row.names(diff_gene)
   
   # id transform
-  rat_symbols <- getBM(attributes=c("ensembl_gene_id","external_gene_name","entrezgene_id", "description"),
+  rat_symbols = getBM(attributes=c("ensembl_gene_id","external_gene_name","entrezgene_id", "description"),
                        filters = 'ensembl_gene_id', values = ensembl_gene_id, mart = mart)
   
   # merge symbols to DE analysis data
-  diff_gene$ensembl_gene_id <- ensembl_gene_id
+  diff_gene$ensembl_gene_id = ensembl_gene_id
   # as dataframe
-  diff_gene_dataframe <- as.data.frame(diff_gene)
+  diff_gene_dataframe = as.data.frame(diff_gene)
   # merge
-  diff_gene_symbols <- merge(diff_gene_dataframe, rat_symbols, by = c("ensembl_gene_id"))
+  diff_gene_symbols = merge(diff_gene_dataframe, rat_symbols, by = c("ensembl_gene_id"))
   
   # write data into file
   print("====> write the table.")
@@ -128,7 +128,7 @@ compare_samples <- function(args_list){
   # ============= GO ====================
   for(i in c("CC", "BP", "MF")){
     print(paste("====> begin to GO ", i, " analysis", sep = ""))
-    ego <- enrichGO(gene          = rat_symbols$ensembl_gene_id,
+    ego = enrichGO(gene          = rat_symbols$ensembl_gene_id,
                     OrgDb         = org.Rn.eg.db,
                     keyType       = "ENSEMBL",
                     ont           = paste(i, sep = ""),
@@ -158,7 +158,7 @@ compare_samples <- function(args_list){
   }
   
   # =========== KEGG =================
-  kk <- enrichKEGG(gene = rat_symbols$entrezgene_id, 
+  kk = enrichKEGG(gene = rat_symbols$entrezgene_id, 
                    organism ='rno',
                    pvalueCutoff = 0.05,
                    qvalueCutoff = 0.05,
@@ -191,5 +191,4 @@ compare_samples( list(samples=c("NM", "LMC1", "LMC2"        ), levels = c("M_con
 
 
 compare_samples( list(samples=c("NM", "LMB1", "LMC1"        ), levels = c("M_contr","M_exper"), dir = "../stat/MB1_MC1") )
-compare_samples( list(samples=c("NM", "LMB2", "LMB2", "LMC2"), levels = c("M_contr","M_exper"), dir = "../stat/MB2_3_MC2") )
-
+compare_samples( list(samples=c("NM", "LMB2", "LMB3", "LMC2"), levels = c("M_contr","M_exper"), dir = "../stat/MB2_3_MC2") )
