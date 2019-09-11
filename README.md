@@ -78,10 +78,7 @@
 +   annotation:   |-gene1-|  |-gene2-|  |-gene3-|
 ```
 
-
-# RNA-seq分析
-
-## 0. 介绍
+RNA-seq 除了得到差异表达的基因之外，还可以对SNP、新颖的转录本、可变剪接、RNA编辑等进行分析，但是最为常见的是得到差异表达的基因。
 
 + 分析流程的结构是(仿照[`Tom Battaglia`](https://github.com/twbattaglia))
 
@@ -1193,14 +1190,29 @@ write.csv(data_merge, "merge.csv", quote = FALSE, row.names = FALSE)
 ![](./pic/read_map_and_count.png)
 
 
-+ read count与相对表达量
++ `read count`与相对表达量
 
-得到的原始`read count`并不能体现出基因与基因之间的相对的表达量的关系。如上图所示，不同的基因的长度不同，那么对应的read比对到的区域的大小不同，基因之间的长度不同这就带来了**直接比落在基因上的read数量来说明表达量就是不公平的**这种情况（就好比直接比两个人的体重来判定胖瘦一样，比如一个100斤的6-7岁的小胖子和110斤的成年人一样，不考虑身高因素这种关键是没有意义的），所以需要根据基因的长度来对原始的read count进行转化之后才能**公平**。
+得到的原始`read count`并不能体现出基因与基因之间的相对的表达量的关系。比如经过`HTseq-count`之后得到的那些数值，这个数值就是说落在基因区域内的read的数量。但是如上图所示，不同的基因的长度不同，那么对应的read比对到的区域的大小不同，基因之间的长度不同这就带来了**直接比落在基因上的read数量来说明表达量就是不公平的**这种情况（就好比直接比两个人的体重来判定胖瘦一样，比如一个100斤的6-7岁的小胖子和110斤的成年人一样，不考虑身高因素这种关键是没有意义的），所以需要根据基因的长度来对原始的read count进行转化之后才能**公平**。这里的标准化是属于**样本内**的各个基因之间的表达量的标准化。
 
 <img src="./pic/child_adult.jpg" alt="Sample"  width="250">
 
+但是后续只是为了分析基因的差异表达，所以在对测序**深度进行标准化之后**就可以直接对不同样本同一个基因之间的read count数进行比较，因为并不涉及到一个样本内不同基因的对比。与上面的样本内的不同，这个是属于**样本间**的标准化，因为不同RNA-seq的测序深度可能是有差别的。
 
-但是其实这个只是为了分析基因的差异，其实在对测序深度进行标准化之后就可以直接对不同样本同一个基因之间的read count数进行比较，因为并不涉及到一个样本内不同基因的对比。为了后续可能需要的QPCR实验验证，这里将数据进行一个标准化的计算。相关博文[RNA-Seq分析|RPKM, FPKM, TPM, 傻傻分不清楚？](http://www.360doc.com/content/18/0112/02/50153987_721216719.shtml)；[BBQ(生物信息基础问题35，36)：RNA-Seq 数据的定量之RPKM，FPKM和TPM](https://www.jianshu.com/p/30035cae4ee9)，但是目前存在争议究竟是使用`FPKM`还是`TPM`的问题，这里对两种方法都进行计算。
+```
+             样本间相同基因的对比（分位数标准化或者深度标准化）
+                    |
+          sample1   |   sample2      sample3
+gene1       x    <--+-->  x            x
+                                       ^
+                                       |
+                                       +------ 样本内的不同基因对比（RPKM标准化）
+                                       |
+                                       v
+gene2       x             x            x
+gene3       x             x            x
+```
+
+为了后续可能需要的QPCR实验验证，这里将数据进行一个样本内的标准化的计算。但是这个数值不用于后续的差异分析当中。相关博文[RNA-Seq分析|RPKM, FPKM, TPM, 傻傻分不清楚？](http://www.360doc.com/content/18/0112/02/50153987_721216719.shtml)；[BBQ(生物信息基础问题35，36)：RNA-Seq 数据的定量之RPKM，FPKM和TPM](https://www.jianshu.com/p/30035cae4ee9)，但是目前存在争议究竟是使用`FPKM`还是`TPM`的问题，这里对两种方法都进行计算。
 
 + 首先得到相关基因的长度信息
 
@@ -1233,34 +1245,30 @@ write.table(data, file = "rn6_gene_len.tsv", row.names = TRUE, sep="\t", quote =
 计算公式
 
 ```
-+-------------------------------+
-| RPKM = (10^6 * nr) / (L * N)  |
-+-------------------------------+
+RPKM = (10^6 * nr) / (L * N)
+```
++ `RPKM`: Reads Per Kilobase per Million
++ `nr`  : 比对至目标基因的read数量
++ `L`   : 目标基因的外显子长度之和除以1000(因此，**要注意这里的L单位是kb，不是bp**)
++ `N`   : 是总有效比对至基因组的read数量
 
-       RPKM: Reads Per Kilobase per Million
-       nr  : 比对至目标基因的read数量
-       L   : 目标基因的外显子长度之和除以1000(因此，要注意这里的L单位是kb，不是bp)
-       N   : 是总有效比对至基因组的read数量
-
-
-+------------------------------------+
-| TPM = nr * read_r * 10^6 / g_r * T |
-| T   = ∑(ni * read_i / g_i)         |
-+------------------------------------+
+```
+TPM = nr * read_r * 10^6 / g_r * T
+T   = ∑(ni * read_i / g_i)
+```
 
 简言之
 
-+--------------------------------------+
-| TPM = (nr / g_r) * 10^6 / ∑(ni / gi) |
-+--------------------------------------+
-
-       TPM   : Transcripts Per Million
-       nr    : 比对至目标基因的read数量
-       read_r: 是比对至基因r的平均read长度
-       g_r   : 是基因r的外显子长度之和（这里无需将其除以1000）
 ```
+TPM = (nr / g_r) * 10^6 / ∑(ni / gi)
+```
++ `TPM`   : Transcripts Per Million
++ `nr`    : 比对至目标基因的read数量
++ `read_r`: 是比对至基因r的平均read长度
++ `g_r`   : 是基因r的外显子长度之和（**这里无需将其除以1000**）
 
-开始计算`RPKM`
+
+开始计算`RPKM` 和 `TPM`
 
 ```R
 #!R
@@ -1680,9 +1688,9 @@ dir.create("../DESeq2")
 write.csv(result, file="../DESeq2/results.csv")
 ```
 
-## 10. 提取差异表达基因
+## 10. 提取差异表达基因与注释
 
-### 名词解释
+### 10.1 名词解释
 
 + `Log2FC ` FC就是`Fold Change`就是倍数差异，就是将对照组与实验组的基因表达量的差别，一般将`Fold Change`等于2作为是否差异的临界点，那么对应的`Log2FC`就是`1`。 
 
@@ -1708,9 +1716,7 @@ dir.create("../DESeq2/")
 write.csv(diff_gene, file="../DESeq2/difference.csv")
 ```
 
-## 11. 差异表达基因注释
-
-### 使用Y叔的`ClusterProfiler`对基因的ID进行
+### 10.2 使用Y叔的`ClusterProfiler`对基因的ID进行
 
 ```R
 # 首先安装ClusterProfiler
@@ -1740,7 +1746,7 @@ ensembl_id_transform(ensembl_gene_id)
 
 使用`ClusterProfiler`包进行转化似乎有部分没有映射到，换`biomaRt`包试一下
 
-### 使用`biomaRt`
+### 10.3 使用`biomaRt`
 
 ```R
 # 安装
@@ -1790,7 +1796,7 @@ do
 done
 ```
 
-使用R绘图
+使用`R`绘图
 
 ```R
 library(ggplot2)
@@ -1803,8 +1809,7 @@ pdf("samples_diff_gene_num.pdf")
 dev.off()
 ```
 
-
-## 13. 数据可视化
+## 11. 可视化
 
 + MA图
 
@@ -1815,7 +1820,10 @@ dev.off()
 plotMA(result_order, ylim=c(-10,10))
 ```
 
-## 14. 富集分析
++ 热图
+
+
+## 12. 富集分析
 
 + 使用`clusterProfiler`进行富集分析
 
@@ -1828,7 +1836,7 @@ rat_symbols <- getBM(attributes=c("ensembl_gene_id","external_gene_name","entrez
 diff_gene_ensembl_id <- rat_symbols$ensembl_gene_id
 ```
 
-### 14.1 `Gene Ontology (GO)`分析
+### 12.1 `Gene Ontology (GO)`分析
 
 + GO的三大类
 
@@ -1878,16 +1886,45 @@ Arguments:
 
 
 ```R
-ego_bp<-enrichGO(gene       = rat_symbols$entrezgene_id,
-                 OrgDb      = org.Rn.eg.db,
-                 keyType    = 'ENSEMBL',
-                 ont        = "BP",
-                 pAdjustMethod = "BH",
-                 pvalueCutoff = 0.01,
-                 qvalueCutoff = 0.05)
+for(i in c("MF", "BP", "CC")){
+    ego <- enrichGO(gene       = rat_symbols$entrezgene_id,
+                    OrgDb      = org.Rn.eg.db,
+                    keyType    = 'ENSEMBL',
+                    ont        = i,
+                    pAdjustMethod = "BH",
+                    pvalueCutoff = 0.01,
+                    qvalueCutoff = 0.05)
+    dotplot(ego, showCategory = 30, title = paste("The GO ", i, " enrichment analysis", sep = ""))
+}
 ```
 
-### 另外可以使用一个在线网站
+### 12.2 KEGG分析
+
+```R
+kk <- enrichKEGG(gene = gene, 
+                 organism ='rno',
+                 pvalueCutoff = 0.05,
+                 qvalueCutoff = 0.05,
+                 minGSSize = 1,
+                 #readable = TRUE ,
+                 use_internal_data = FALSE)
+```
+
+### 12.3 GSEA分析
+
+这个富集方式与上面的相似，它就是以KEGG数据库（或其他基因注释数据库，例如GO）为背景，根据所选样品所有的基因表达量来做富集分析，得到的结果是所有表达的基因在各个代谢通路中的富集情况。
+
+但是与上面的两个富集分析不同，它的输入文件不是一个基因列表，而是除了基因之外还有它的表达量（目前样本中所有的非`0`的基因的倍数的改变的数值）。
+
+另外就是GSEA针对**所有基因**，KEGG针对**差异基因**富集的通路，现在一般结合两者的结果来做推断。
+
++ 制作genelist
++ GSEA分析
++ 富集分布
+
+### 12.4 另外可以使用一个在线网站 —— [metascape](http://metascape.org/gp/index.html)
+
+将
 
 ## ========================================
 
@@ -2113,16 +2150,32 @@ biocLite("dplyr")
 主要参考
 
 + [Y大宽 - RNA-seq(7): DEseq2筛选差异表达基因并注释(bioMart)](https://www.jianshu.com/p/3a0e1e3e41d0)
+
 + [Y大宽 - RNA-seq(8): 探索分析结果:Data visulization](https://www.jianshu.com/p/807cf4a969fb)
+
 + [Dawn_天鹏 - 转录组学习三（数据质控）](https://www.jianshu.com/p/bacb86c78b43) - fastqc结果解释的很好
+
 + [Dawn_天鹏 - 转录组学习七（差异基因分析）](https://www.jianshu.com/p/26511d3360c8)
+
 + [RNA-seq workflow: gene-level exploratory analysis and differential expression](https://master.bioconductor.org/packages/release/workflows/vignettes/rnaseqGene/inst/doc/rnaseqGene.html)
+
 + [RNAseq-workflow](https://github.com/twbattaglia/RNAseq-workflow)
+
 + [DESeq2分析转录组之预处理+差异分析](https://www.jianshu.com/p/309c35fa6c7f) - 样本对比关系设定
+
 + [Bioconductor分析RNA-seq数据](https://www.jianshu.com/p/8f89284c16f8)
+
 + [转录组入门(6)： reads计数](https://www.jianshu.com/p/e9742bbf83b9) - 转录组分析的三个水平
+
 + [Htseq Count To Fpkm](http://www.bioinfo-scrounger.com/archives/342) - 得到基因的外显子长度
+
 + [人人都要会的转录组(RNA-seq)下游分析](https://zhuanlan.zhihu.com/p/77901431)
+
++ [浅谈GSEA分析和KEGG富集分析的异同](http://www.dxy.cn/bbs/topic/39085659?sf=2&dn=4)
+
++ [对转录组数据进行质量控制分析](http://www.chenlianfu.com/?p=2286)
+
++ [RNA-seq 基本分析流程](https://www.cnblogs.com/easoncheng/archive/2013/02/26/2934000.html)
 
 ### 结果解读
 
@@ -2141,6 +2194,7 @@ biocLite("dplyr")
 + [biostar - Question: Stringtie prepDE.py Error line 32](https://www.biostars.org/p/306894/) - prepDE.py脚本出错
 + [生信技能树 - biomart](https://www.jianshu.com/p/0dbd5528ce3d) - biomart用法（中文解读中最为详细的）
 + [Question: 98.21% of input gene IDs are fail to map](https://www.biostars.org/p/296321/) - 使用`ClusterProfiler`包可能会出现`input gene IDs are fail to map`就是部分基因没有对应到数据库中
++ [用RNA-SeQC得到表达矩阵RPKM值](https://www.jianshu.com/p/bf87bf3ca469)
 
 ### 问题
 
@@ -2165,3 +2219,4 @@ biocLite("dplyr")
 **Q：RNA-seq多少个重复比较合适？**
 
   + **A：[RNA测序中多少生物学重复合适](http://www.sohu.com/a/248181085_769248)** - 出于科研经费和实验结果准确性的综合考虑，RNA测序中每组至少使用6个生物学重复。若实验目的是鉴定所有倍数变化的差异基因，至少需要12个生物学重复。
+  
