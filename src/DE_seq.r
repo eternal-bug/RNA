@@ -10,6 +10,7 @@ biocLite("clusterProfiler")
 biocLite("factoextra")
 
 library(stringr)
+library(parallel)
 library(DESeq2)
 library(pheatmap)
 library(biomaRt)
