@@ -1,3 +1,5 @@
+![](./pic/RNA-seq.jpg)
+
 # 目录
 
 * [RNA-seq分析](#rna-seq分析)
