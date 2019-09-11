@@ -125,7 +125,7 @@ compare_samples <- function(args_list){
   write.table(diff_gene_symbols, paste(dir, "/diff_gene.tsv", sep = ""), row.names = F,sep="\t", quote = FALSE)
   
   # enrichment analysis
-  # GO
+  # ============= GO ====================
   for(i in c("CC", "BP", "MF")){
     print(paste("====> begin to GO ", i, " analysis", sep = ""))
     ego <- enrichGO(gene          = rat_symbols$ensembl_gene_id,
@@ -135,6 +135,7 @@ compare_samples <- function(args_list){
                     pAdjustMethod = "BH",
                     pvalueCutoff  = 0.01,
                     qvalueCutoff  = 0.05)
+    # bubble pic
     pdf(paste(dir, "/", i, "_bubble", ".pdf", sep = ""))
         print(
           dotplot(ego, showCategory = 30,
@@ -145,13 +146,18 @@ compare_samples <- function(args_list){
     while (!is.null(dev.list())){
         dev.off()
     }
+    # graph pic
     pdf(paste(dir, "/", i, "_graph", ".pdf", sep = ""))
         print(plotGOgraph(ego))
     while (!is.null(dev.list())){
       dev.off()
     }
+    # store data
+    write.table(ego@result, paste(dir, "/", i, ".tsv", sep = ""),
+                row.names = F,sep="\t", quote = FALSE)
   }
-  # KEGG
+  
+  # =========== KEGG =================
   kk <- enrichKEGG(gene = rat_symbols$entrezgene_id, 
                    organism ='rno',
                    pvalueCutoff = 0.05,
@@ -159,6 +165,7 @@ compare_samples <- function(args_list){
                    minGSSize = 1,
                    #readable = TRUE ,
                    use_internal_data = FALSE)
+  # bubble pic
   pdf(paste(dir, "/", "kegg_graph", ".pdf", sep = ""))
   print(
     dotplot(kk, showCategory = 30,
@@ -169,12 +176,20 @@ compare_samples <- function(args_list){
   while (!is.null(dev.list())){
     dev.off()
   }
+  # store data
+  write.table(kk@result, paste(dir, "/","kegg.tsv", sep = ""),
+              row.names = F,sep="\t", quote = FALSE)
 }
 
-# compare
+
 compare_samples( list(samples=c("NH", "LHA1", "LHA2", "LHA3"), levels = c("H_contr","H_exper"), dir = "../stat/HA") )
 compare_samples( list(samples=c("NH", "LHB1", "LHB2"        ), levels = c("H_contr","H_exper"), dir = "../stat/HB") )
 compare_samples( list(samples=c("NH", "LHC1", "LHC2", "LHC3"), levels = c("H_contr","H_exper"), dir = "../stat/HC") )
 compare_samples( list(samples=c("NM", "LMA1", "LMA2", "LMA3"), levels = c("M_contr","M_exper"), dir = "../stat/MA") )
 compare_samples( list(samples=c("NM", "LMB1", "LMB2", "LMB3"), levels = c("M_contr","M_exper"), dir = "../stat/MB") )
 compare_samples( list(samples=c("NM", "LMC1", "LMC2"        ), levels = c("M_contr","M_exper"), dir = "../stat/MC") )
+
+
+compare_samples( list(samples=c("NM", "LMB1", "LMC1"        ), levels = c("M_contr","M_exper"), dir = "../stat/MB1_MC1") )
+compare_samples( list(samples=c("NM", "LMB2", "LMB2", "LMC2"), levels = c("M_contr","M_exper"), dir = "../stat/MB2_3_MC2") )
+
