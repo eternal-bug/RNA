@@ -653,11 +653,11 @@ $ gzip -d rn6.tar.gz
 
 ```bash
 $ cd ~/project/rat/annotation
-$ wget ftp://ftp.ensembl.org/pub/release-97/gtf/rattus_norvegicus/Rattus_norvegicus.Rnor_6.0.97.gtf.gz
-$ gzip -d Rattus_norvegicus.Rnor_6.0.97.gtf.gz
+$ wget ftp://ftp.ensembl.org/pub/release-97/gff3/rattus_norvegicus/Rattus_norvegicus.Rnor_6.0.97.gff3.gz
+$ gzip -d Rattus_norvegicus.Rnor_6.0.97.gff3.gz
 
 # 同样的也改名
-$ mv Rattus_norvegicus.Rnor_6.0.97.gtf rn6.gff
+$ mv Rattus_norvegicus.Rnor_6.0.97.gff3 rn6.gff
 
 # 使用head查看部分
 $ head rn6.gff
