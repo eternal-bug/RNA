@@ -9,6 +9,7 @@ biocLite("org.Rn.eg.db")
 biocLite("clusterProfiler")
 biocLite("factoextra")
 
+library(stringr)
 library(DESeq2)
 library(pheatmap)
 library(biomaRt)
@@ -81,9 +82,12 @@ compare_samples <- function(args_list){
   # data sampling
   coldata_g = subset(coldata, row.names(coldata) %in% samples)
   countdata_g = countdata[samples]
-  dds = DESeqDataSetFromMatrix(countData = countdata_g, colData = coldata_g, design= ~ condition)
-  dds$condition <- factor(as.vector(dds$condition), levels = levels)
+  dds = DESeqDataSetFromMatrix(countData = countdata_g, colData = coldata_g, design= ~ treatment)
+  
+  dds$treatment <- factor(as.vector(dds$treatment), levels = levels)
+  
   dds <- DESeq(dds)
+  
   # result
   result <- results(dds, pAdjustMethod = "fdr", alpha = 0.05)
   result_order <- result[order(result$pvalue),]
@@ -121,6 +125,7 @@ compare_samples <- function(args_list){
   write.table(diff_gene_symbols, paste(dir, "/diff_gene.tsv", sep = ""), row.names = F,sep="\t", quote = FALSE)
   
   # enrichment analysis
+  # GO
   for(i in c("CC", "BP", "MF")){
     print(paste("====> begin to GO ", i, " analysis", sep = ""))
     ego <- enrichGO(gene          = rat_symbols$ensembl_gene_id,
@@ -130,16 +135,46 @@ compare_samples <- function(args_list){
                     pAdjustMethod = "BH",
                     pvalueCutoff  = 0.01,
                     qvalueCutoff  = 0.05)
-    pdf(paste(dir, "/", i, ".pdf", sep = ""))
-        print(dotplot(ego, showCategory = 30, title = paste("The GO ", i, " enrichment analysis", sep = "")))
-    while (!is.null(dev.list()))  dev.off()
+    pdf(paste(dir, "/", i, "_bubble", ".pdf", sep = ""))
+        print(
+          dotplot(ego, showCategory = 30,
+                  title = paste("The GO ", i, " enrichment analysis", sep = "")) +
+          scale_y_discrete(labels = str_wrap(ego_bp@result$Description, width = 60)) + 
+          theme(axis.text.y = element_text(size = 8))
+        )
+    while (!is.null(dev.list())){
+        dev.off()
+    }
+    pdf(paste(dir, "/", i, "_graph", ".pdf", sep = ""))
+        print(plotGOgraph(ego))
+    while (!is.null(dev.list())){
+      dev.off()
+    }
+  }
+  # KEGG
+  kk <- enrichKEGG(gene = rat_symbols$entrezgene_id, 
+                   organism ='rno',
+                   pvalueCutoff = 0.05,
+                   qvalueCutoff = 0.05,
+                   minGSSize = 1,
+                   #readable = TRUE ,
+                   use_internal_data = FALSE)
+  pdf(paste(dir, "/", "kegg_graph", ".pdf", sep = ""))
+  print(
+    dotplot(ego, showCategory = 30,
+            title = "The KEGG enrichment analysis") +
+      scale_y_discrete(labels = str_wrap(ego_bp@result$Description, width = 60)) + 
+      theme(axis.text.y = element_text(size = 8))
+  )
+  while (!is.null(dev.list())){
+    dev.off()
   }
 }
 
 # compare
-compare_samples( list(samples=c("NH", "LHA1", "LHA2", "LHA3"), levels = c("HC","H1"), dir = "../stat/HA") )
-compare_samples( list(samples=c("NH", "LHB1", "LHB2"        ), levels = c("HC","H2"), dir = "../stat/HB") )
-compare_samples( list(samples=c("NH", "LHC1", "LHC2", "LHC3"), levels = c("HC","H3"), dir = "../stat/HC") )
-compare_samples( list(samples=c("NM", "LMA1", "LMA2", "LMA3"), levels = c("MC","M1"), dir = "../stat/MA") )
-compare_samples( list(samples=c("NM", "LMB1", "LMB2", "LMB3"), levels = c("MC","M2"), dir = "../stat/MB") )
-compare_samples( list(samples=c("NM", "LMC1", "LMC2"        ), levels = c("MC","M3"), dir = "../stat/MC") )
+compare_samples( list(samples=c("NH", "LHA1", "LHA2", "LHA3"), levels = c("H_contr","H_exper"), dir = "../stat/HA") )
+compare_samples( list(samples=c("NH", "LHB1", "LHB2"        ), levels = c("H_contr","H_exper"), dir = "../stat/HB") )
+compare_samples( list(samples=c("NH", "LHC1", "LHC2", "LHC3"), levels = c("H_contr","H_exper"), dir = "../stat/HC") )
+compare_samples( list(samples=c("NM", "LMA1", "LMA2", "LMA3"), levels = c("M_contr","M_exper"), dir = "../stat/MA") )
+compare_samples( list(samples=c("NM", "LMB1", "LMB2", "LMB3"), levels = c("M_contr","M_exper"), dir = "../stat/MB") )
+compare_samples( list(samples=c("NM", "LMC1", "LMC2"        ), levels = c("M_contr","M_exper"), dir = "../stat/MC") )
