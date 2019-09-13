@@ -1467,6 +1467,8 @@ dds <- DESeqDataSetFromMatrix(countData = cts, colData = coldata, design= ~ batc
 | Experiment1 | treatment |
 | Experiment2 | treatment |
 
+treatment不一定就是指代样本是经过什么处理的，也可以是`细胞类型`、`基因型`、`表现型`、`样本处理方式`、`批次`等等信息，这些信息是被用于区分样本的性质，所以说是很重要的信息，如果分错那么数据比较的时候就会相应的发生变化，最后得到正确的结果。
+
 + `design（样本差异比较）`：就是指定样本依据什么分为实验组与对照组
 
 上面的`表达矩阵`已经得到了，下面需要生成样本的信息，下面的表格我直接从NCBI的`Run selector`中得到。
