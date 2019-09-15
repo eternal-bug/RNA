@@ -1252,22 +1252,19 @@ write.table(data, file = "rn6_gene_len.tsv", row.names = TRUE, sep="\t", quote =
 ```
 CPM = (10^6 * nr) / N
 ```
-  + `CPM` : Counts per million
-  + `nr`  : 比对至目标基因的read数量
-  + `N`   : 是总有效比对至基因组的read数量
+   + `CPM` : Counts per million
+   + `nr`  : 比对至目标基因的read数量
+   + `N`   : 是总有效比对至基因组的read数量
 
 + `RPKM`计算公式
 
 ```
 RPKM = (10^6 * nr) / (L * N)
 ```
-  + `RPKM`: Reads Per Kilobase per Million
-  + `nr`  : 比对至目标基因的read数量
-  + `L`   : 目标基因的外显子长度之和除以1000(因此，**要注意这里的L单位是kb，不是bp**)
-  + `N`   : 是总有效比对至基因组的read数量
-
-
-
+   + `RPKM`: Reads Per Kilobase per Million
+   + `nr`  : 比对至目标基因的read数量
+   + `L`   : 目标基因的外显子长度之和除以1000(因此，**要注意这里的L单位是kb，不是bp**)
+   + `N`   : 是总有效比对至基因组的read数量
 
 ```R
 #!R
@@ -1308,10 +1305,10 @@ T   = ∑(ni * read_i / g_i)
 ```
 TPM = (nr / g_r) * 10^6 / ∑(ni / gi)
 ```
-+ `TPM`   : Transcripts Per Million
-+ `nr`    : 比对至目标基因的read数量
-+ `read_r`: 是比对至基因r的平均read长度
-+ `g_r`   : 是基因r的外显子长度之和（**这里无需将其除以1000**）
+   + `TPM`   : Transcripts Per Million
+   + `nr`    : 比对至目标基因的read数量
+   + `read_r`: 是比对至基因r的平均read长度
+   + `g_r`   : 是基因r的外显子长度之和（**这里无需将其除以1000**）
 
 
 ```R
