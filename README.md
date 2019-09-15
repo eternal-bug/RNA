@@ -1243,21 +1243,31 @@ data <- t(as.data.frame(gene_len))
 # 写入文件
 write.table(data, file = "rn6_gene_len.tsv", row.names = TRUE, sep="\t", quote = FALSE, col.names = FALSE)
 ```
-然后相应根据公式计算
 
+
+开始计算`RPKM` 和 `TPM`
+
++ `cpm`计算公式
+
+```
+CPM = (10^6 * nr) / N
+```
+  + `CPM` : Counts per million
+  + `nr`  : 比对至目标基因的read数量
+  + `N`   : 是总有效比对至基因组的read数量
 
 + `RPKM`计算公式
 
 ```
 RPKM = (10^6 * nr) / (L * N)
 ```
-+ `RPKM`: Reads Per Kilobase per Million
-+ `nr`  : 比对至目标基因的read数量
-+ `L`   : 目标基因的外显子长度之和除以1000(因此，**要注意这里的L单位是kb，不是bp**)
-+ `N`   : 是总有效比对至基因组的read数量
+  + `RPKM`: Reads Per Kilobase per Million
+  + `nr`  : 比对至目标基因的read数量
+  + `L`   : 目标基因的外显子长度之和除以1000(因此，**要注意这里的L单位是kb，不是bp**)
+  + `N`   : 是总有效比对至基因组的read数量
 
 
-开始计算`RPKM` 和 `TPM`
+
 
 ```R
 #!R
