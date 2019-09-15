@@ -1153,7 +1153,7 @@ ENSRNOG00000000033	27
 
 下面使用`R`语言中的`merge`将表格合并
 
-```bash
+```R
 rm(list=ls())
 setwd("~/project/rat/output/HTseq")
 
@@ -1304,7 +1304,7 @@ TPM = (nr / g_r) * 10^6 / ∑(ni / gi)
 + `g_r`   : 是基因r的外显子长度之和（**这里无需将其除以1000**）
 
 
-```
+```R
 # =========== 计算TPM ============
 # 首先得到总的结果
 sum_ <- 0
@@ -1355,28 +1355,20 @@ write.table(count, "123.normalize.count", col.names = TRUE, row.names = TRUE, se
 经过`nr / N`归一化压缩到`0~1`的范围内（这个时候没有乘以`10^6 / L`这个常量），那么按照比例来说一样，但是实际上的RNA表达量数值是不等的。只能说表达的占比相等。
 
 ```
-肝细胞某基因表达量：
+                    归一化
 
-y^
-1|-------------+
- |             |
- |             |
- |   *         |
- | *           |
- +--------------->
-               1 x
+----------------------------------------------
 
+肝细胞某基因表达量：         红细胞某基因表达量：
 
-红细胞某基因表达量： 
-
-y^
-1|-------------+
- |             |
- |             |
- |   *         |
- | *           |
- +--------------->
-               1 x
+y^                         y^
+1|-------------+           1|-------------+
+ |             |            |             |
+ |             |            |             |
+ |   *         |            |   *         |
+ | *           |            | *           |
+ +--------------->          +--------------->
+               1 x                         1x
 ```
 
 但是这个数值相等了，是否能评判不同组织中的具体的基因表达量呢？
@@ -2203,33 +2195,21 @@ biocLite("dplyr")
 
 主要参考
 
-+ [Y大宽 - RNA-seq(7): DEseq2筛选差异表达基因并注释(bioMart)](https://www.jianshu.com/p/3a0e1e3e41d0)
-
-+ [Y大宽 - RNA-seq(8): 探索分析结果:Data visulization](https://www.jianshu.com/p/807cf4a969fb)
-
++ [\* Y大宽 - RNA-seq(7): DEseq2筛选差异表达基因并注释(bioMart)](https://www.jianshu.com/p/3a0e1e3e41d0)
++ [\* Y大宽 - RNA-seq(8): 探索分析结果:Data visulization](https://www.jianshu.com/p/807cf4a969fb)
 + [Dawn_天鹏 - 转录组学习三（数据质控）](https://www.jianshu.com/p/bacb86c78b43) - fastqc结果解释的很好
-
 + [Dawn_天鹏 - 转录组学习七（差异基因分析）](https://www.jianshu.com/p/26511d3360c8)
-
 + [RNA-seq workflow: gene-level exploratory analysis and differential expression](https://master.bioconductor.org/packages/release/workflows/vignettes/rnaseqGene/inst/doc/rnaseqGene.html)
-
-+ [RNAseq-workflow](https://github.com/twbattaglia/RNAseq-workflow)
-
++ [\* RNAseq-workflow](https://github.com/twbattaglia/RNAseq-workflow)
 + [DESeq2分析转录组之预处理+差异分析](https://www.jianshu.com/p/309c35fa6c7f) - 样本对比关系设定
-
 + [Bioconductor分析RNA-seq数据](https://www.jianshu.com/p/8f89284c16f8)
-
 + [转录组入门(6)： reads计数](https://www.jianshu.com/p/e9742bbf83b9) - 转录组分析的三个水平
-
 + [Htseq Count To Fpkm](http://www.bioinfo-scrounger.com/archives/342) - 得到基因的外显子长度
-
-+ [人人都要会的转录组(RNA-seq)下游分析](https://zhuanlan.zhihu.com/p/77901431)
-
++ [\* 人人都要会的转录组(RNA-seq)下游分析](https://zhuanlan.zhihu.com/p/77901431)
 + [浅谈GSEA分析和KEGG富集分析的异同](http://www.dxy.cn/bbs/topic/39085659?sf=2&dn=4)
-
 + [对转录组数据进行质量控制分析](http://www.chenlianfu.com/?p=2286)
-
 + [RNA-seq 基本分析流程](https://www.cnblogs.com/easoncheng/archive/2013/02/26/2934000.html)
++ [\* 使用limma、Glimma和edgeR，RNA-seq数据分析易如反掌](https://bioconductor.org/packages/release/workflows/vignettes/RNAseq123/inst/doc/limmaWorkflow_CHN.html)
 
 ### 结果解读
 
