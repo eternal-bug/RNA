@@ -1071,7 +1071,8 @@ SRR2240184.sort.bam.bai SRR2240228.sort.bam.bai
 
 如何判断一个 reads 属于某个基因， htseq-count 提供了 union, intersection_strict,intersection_nonempty 3 种模型，如图（大多数情况下作者推荐用 union 模型），它描述了在多种情况下，比对到基因组上的read分配的问题，在这些问题中，最难分配的就是一条read在两个基因相交的地方比对上了之后的情况。一般情况下作者推荐使用`union`的方式。当然，除此之外
 
-![](./pic/HTseq.png)
+
+![](./pic/HTSeq.png)
 
 + 用法
 
