@@ -1190,16 +1190,15 @@ write.csv(data_merge, "merge.csv", quote = FALSE, row.names = FALSE)
 
 在一个细胞中，如果统计某一个基因的表达得到的所有的RNA，这个数量就是**绝对的数量**，就是实际上有多少。但是在RNA-seq中，并不知道被用于测序的组织块有多少个细胞，另外提取RNA的过程中损失了多少，那么最后我们通过这个read count以及标准化之后得到的并不是真实的具体的数量，这个数量是**相对定量**，就是这个数值单独拿出来没有什么意义，但是在数据相互比较中才显示出意义来。
 
-![](./pic/read_map_and_count.png)
-
-
 + `read count`与相对表达量
 
 <table>
     <tr>
         <td>
-            <img align="right" src="./pic/child_adult.jpg" alt="Sample"  width="100">
-            得到的原始<code>read count</code>并不能体现出基因与基因之间的相对的表达量的关系。比如经过<code>HTseq-count</code>之后得到的那些数值，这个数值就是说落在基因区域内的read的数量。但是如上图所示，不同的基因的长度不同，那么对应的read比对到的区域的大小不同，基因之间的长度不同这就带来了<strong>直接比落在基因上的read数量来说明表达量就是不公平的</strong>这种情况（就好比直接比两个人的体重来判定胖瘦一样，比如一个100斤的6-7岁的小胖子和110斤的成年人一样，不考虑身高因素这种关键是没有意义的），所以需要根据基因的长度来对原始的read count进行转化之后才能<strong>公平</strong>。这里的标准化是属于<strong>样本内</strong>的各个基因之间的表达量的标准化。
+            <img align="left" src="./pic/read_map_and_count.png" alt="Sample"  height="300">
+            得到的原始<code>read count</code>并不能体现出基因与基因之间的相对的表达量的关系。比如经过<code>HTseq-count</code>之后得到的那些数值，这个数值就是说落在基因区域内的read的数量。但是如上图所示，不同的基因的长度不同，那么对应的read比对到的区域的大小不同，基因之间的长度不同这就带来了<strong>直接比落在基因上的read数量来说明表达量就是不公平的</strong>这种情况
+           <img align="right" src="./pic/child_adult.jpg" alt="Sample"  height="200">
+          （就好比直接比两个人的体重来判定胖瘦一样，比如一个100斤的6-7岁的小胖子和110斤的成年人一样，不考虑身高因素这种关键是没有意义的），所以需要根据基因的长度来对原始的read count进行转化之后才能<strong>公平</strong>。这里的标准化是属于<strong>样本内</strong>的各个基因之间的表达量的标准化。
         </td>
     </tr>
 </table>
