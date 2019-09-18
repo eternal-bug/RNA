@@ -48,7 +48,7 @@
    * [10. 提取差异表达基因](#10-提取差异表达基因)
       * [名词解释](#名词解释)
    * [11. 差异表达基因注释](#11-差异表达基因注释)
-      * [使用Y叔的ClusterProfiler对基因的ID进行](#使用y叔的clusterprofiler对基因的id进行)
+      * [使用ClusterProfiler对基因的ID进行](#使用y叔的clusterprofiler对基因的id进行)
       * [使用biomaRt](#使用biomart)
    * [13. 数据可视化](#13-数据可视化)
    * [14. 富集分析](#14-富集分析)
@@ -1796,7 +1796,9 @@ dir.create("../DESeq2/")
 write.csv(diff_gene, file="../DESeq2/difference.csv")
 ```
 
-### 10.2 使用Y叔的`ClusterProfiler`对基因的ID进行
+### 10.2 使用`ClusterProfiler`对基因的ID进行
+
+
 
 ```R
 # 首先安装ClusterProfiler
