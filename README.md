@@ -1610,12 +1610,15 @@ colData names(4): ids health.state condition treatment
 
 + PCA分析(principal components analysis)
 
-由于上面得到的是最原始的`read count`，但是PCA分析需要对数据进行转化才能进行。一般取对数，但是最原始的数据中有些基因的计数为`0`，这样在取`log`值的时候意味着`−∞`，这样是不行的，所以一般会加上一个常数再取`log`，也就是`log(count + N)`（其中`N`是一个常数），但是也有较好的方法来进行校正，比如`DEseq2`包自带的`vst`函数，全名为[`variance stabilizing transformation`](https://en.wikipedia.org/wiki/Variance-stabilizing_transformation)，它消除了方差对均值的依赖，尤其是低均值时的高`log counts`的变异。
+由于上面得到的是最原始的`read count`，但是PCA分析需要对数据进行转化才能进行。一般取对数，但是最原始的数据中有些基因的计数为`0`，这样在取`log`值的时候意味着`−∞`，这样是不行的，所以一般会加上一个常数再取`log`，也就是`log(count + N)`（其中`N`是一个常数），但是也有较好的方法来进行校正，比如`DEseq2`包自带的`rlog`和`vst`函数（全名为[`variance stabilizing transformation`](https://en.wikipedia.org/wiki/Variance-stabilizing_transformation)），它们消除了方差对均值的依赖，尤其是低均值时的高`log counts`的变异。
+
+> 但是在DESeq2包中实际上已经有了归一化的方法，rlog和vst，在使用的需要根据样本量的多少来选择方法。样本量少于30的话，选择rlog，多于30的话，建议选择vst。
+
 
 ```R
 # 接续着上面的构建得到的dds对象
 # DEseq2包提供了相应的函数
-vsdata <- vst(dds, blind=FALSE)
+vsdata <- rlog(dds, blind=FALSE)
 # intgroup 分组
 plotPCA(vsdata, intgroup="treatment")
 ```
@@ -2243,6 +2246,7 @@ biocLite("dplyr")
 + [RNA-seq workflow: gene-level exploratory analysis and differential expression](https://master.bioconductor.org/packages/release/workflows/vignettes/rnaseqGene/inst/doc/rnaseqGene.html)
 + [\* RNAseq-workflow](https://github.com/twbattaglia/RNAseq-workflow)
 + [DESeq2分析转录组之预处理+差异分析](https://www.jianshu.com/p/309c35fa6c7f) - 样本对比关系设定
++ [DESeq2 PCA 的一些问题](https://www.jianshu.com/p/b7e55bacbede) - rlog和vst
 + [Bioconductor分析RNA-seq数据](https://www.jianshu.com/p/8f89284c16f8)
 + [转录组入门(6)： reads计数](https://www.jianshu.com/p/e9742bbf83b9) - 转录组分析的三个水平
 + [Htseq Count To Fpkm](http://www.bioinfo-scrounger.com/archives/342) - 得到基因的外显子长度
