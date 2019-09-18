@@ -919,7 +919,7 @@ $ parallel -j 4 "
 <table>
     <tr>
         <td>
-            <img src="./pic/RNA-Seq-alignment.png" alt="Sample"  width="400">
+            <img src="./pic/RNA-Seq-alignment.png" align="left" alt="Sample"  width="300">
             得到干净的测序数据之后，接就可以进行序列比对了，比对的过程是一种<strong>寻找</strong>的过程，将<code>read</code>定位到它位于基因组的位置，通过找寻之后才能说这条read是属于哪条基因的，这样才能对基因的表达进行定量。另外RNA-seq的序列与基因组的序列有时候会不一样，因为存在内含子与外显子这种序列的差别，而RNA-seq是测的RNA的序列，所以会出现跨范围的序列的比对（如左图所示）。
         </td>
     </tr>
