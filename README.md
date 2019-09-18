@@ -1731,6 +1731,10 @@ ENSRNOG00000014013 400.690803761036  2.83690340404308 0.246440071910237  11.5115
 ENSRNOG00000018371 705.943312960284  4.65111741552834  0.41021741987017  11.3381762700384  8.4895191640983e-30 2.07950771924588e-26
 ```
 
+**NOTE**
+
+这里的`log2 fold change (MLE): treatment treatment vs control`行很重要，因为高低表达是相对的，这里你知道是谁与谁进行的比较，这里就是`treatment`与`control`进行比较。
+
 + 总结基因上下调情况
 
 ```R
@@ -1767,7 +1771,8 @@ FALSE  TRUE
 ```R
 # 新建文件夹
 dir.create("../DESeq2")
-write.csv(result, file="../DESeq2/results.csv")
+# 不用按照padj排序的结果，就保存按照基因名排序的
+write.csv(result, file="../DESeq2/results.csv", quote = F)
 ```
 
 ## 10. 提取差异表达基因与注释
@@ -1793,14 +1798,12 @@ dim(diff_gene)
 
 + 把差异基因写入到文件中
 
-```
+```R
 dir.create("../DESeq2/")
-write.csv(diff_gene, file="../DESeq2/difference.csv")
+write.csv(diff_gene, file="../DESeq2/difference.csv", quote = F)
 ```
 
 ### 10.2 使用`ClusterProfiler`对基因的ID进行
-
-
 
 ```R
 # 首先安装ClusterProfiler
