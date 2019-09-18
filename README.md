@@ -1785,7 +1785,7 @@ write.csv(result, file="../DESeq2/results.csv", quote = F)
 将上述的数据
 
 ```R
-# padj 小于0.05并且Log2FC大于1
+# padj 小于 0.05 并且 Log2FC 大于 1 或者小于 -1
 diff_gene <- subset(result_order, padj < 0.05 & abs(log2FoldChange) > 1)
 
 # 查看数据框的大小
@@ -1803,7 +1803,7 @@ dir.create("../DESeq2/")
 write.csv(diff_gene, file="../DESeq2/difference.csv", quote = F)
 ```
 
-### 10.2 使用`ClusterProfiler`对基因的ID进行
+### 10.2 使用`ClusterProfiler`对基因的ID进行转化
 
 ```R
 # 首先安装ClusterProfiler
@@ -1833,7 +1833,7 @@ ensembl_id_transform(ensembl_gene_id)
 
 使用`ClusterProfiler`包进行转化似乎有部分没有映射到，换`biomaRt`包试一下
 
-### 10.3 使用`biomaRt`
+### 10.3 使用`biomaRt`进行注释
 
 ```R
 # 安装
