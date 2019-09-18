@@ -1904,7 +1904,7 @@ dev.off()
 + MA图
 
 > MA-plot (R. Dudoit et al. 2002) ，也叫 mean-difference plot或者Bland-Altman plot，用来估计模型中系数的分布。 X轴, the “A” （ “average”）；Y轴，the “M” （“minus”） – subtraction of log values is equivalent to the log of the ratio。
-> M表示log fold change，衡量基因表达量变化，上调还是下调。A表示每个基因的count的均值。根据summary可知，low count的比率很高，所以大部分基因表达量不高，也就是集中在0的附近（log2(1)=0，也就是变化1倍）.提供了模型预测系数的分布总览。
+> M表示log fold change，衡量基因表达量变化，上调还是下调。A表示每个基因的count的均值。提供了模型预测系数的分布总览。
 
 ```R
 plotMA(result_order, ylim=c(-10,10))
@@ -2012,9 +2012,13 @@ kk <- enrichKEGG(gene = gene,
 + GSEA分析
 + 富集分布
 
-### 12.4 另外可以使用一个在线网站 —— [metascape](http://metascape.org/gp/index.html)
+### 12.4 另外可以使用几个在线网站
 
-将
++ [metascape](http://metascape.org/gp/index.html)
+
++ [webgenstal](http://www.webgestalt.org/)
+
++ [DAVID](https://david-d.ncifcrf.gov/)
 
 ## ========================================
 
