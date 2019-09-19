@@ -185,7 +185,7 @@ conda config --add channels bioconda
 建立python3.6的环境 
 
 ```bash
-conda create python36 python=3.6
+conda create --name python36 python=3.6
 ```
 
 ### 2.1 sratoolkit
