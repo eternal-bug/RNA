@@ -1620,7 +1620,7 @@ colData names(4): ids health.state condition treatment
 # DEseq2包提供了相应的函数
 vsdata <- rlog(dds, blind=FALSE)
 # intgroup 分组
-plotPCA(vsdata, intgroup="treatment")
+plotPCA(vsdata, intgroup="treatment") + ylim(-10, 10)
 ```
 
 ![](./pic/PCA_analysis.png)
