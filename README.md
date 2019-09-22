@@ -415,7 +415,7 @@ $ export PATH="$(pwd):$PATH"
 
 ```bash
 $ conda activate python36
-$ pip install HTseq
+$ pip install -i https://pypi.tuna.tsinghua.edu.cn/simple HTseq
 $ conda deactivate
 ```
 ### 2.9 R
