@@ -2304,4 +2304,7 @@ biocLite("dplyr")
 **Q：RNA-seq多少个重复比较合适？**
 
   + **A：[RNA测序中多少生物学重复合适](http://www.sohu.com/a/248181085_769248)** - 出于科研经费和实验结果准确性的综合考虑，RNA测序中每组至少使用6个生物学重复。若实验目的是鉴定所有倍数变化的差异基因，至少需要12个生物学重复。
-  
+
+**Q：How different is rlog transformation from vst transformation in DESeq2**
+
+  + **A：[Question: How different is rlog transformation from vst transformation in DESeq2](https://www.biostars.org/p/338885/)** - 差异不是很明显，但是在运行速度上有一定差别
