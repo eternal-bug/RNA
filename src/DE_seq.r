@@ -6,8 +6,8 @@ package_list = c("DESeq2", "pheatmap", "biomaRt", "org.Rn.eg.db", "clusterProfil
 for(p in package_list){
   if(!suppressWarnings(suppressMessages(require(p, character.only = TRUE, quietly = TRUE, warn.conflicts = FALSE)))){
     biocLite(p)
-    suppressWarnings(suppressMessages(library(p, character.only = TRUE, quietly = TRUE, warn.conflicts = FALSE)))
   }
+  suppressWarnings(suppressMessages(library(p, character.only = TRUE, quietly = TRUE, warn.conflicts = FALSE)))
 }
 
 library(stringr)
