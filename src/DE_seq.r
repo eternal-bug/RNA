@@ -2,21 +2,16 @@ rm(list=ls())
 
 source ("https://bioconductor.org/biocLite.R")
 
-biocLite("DESeq2")
-biocLite("pheatmap")
-biocLite("biomaRt")
-biocLite("org.Rn.eg.db")
-biocLite("clusterProfiler")
-biocLite("factoextra")
+package_list = c("DESeq2", "pheatmap", "biomaRt", "org.Rn.eg.db", "clusterProfiler", "factoextra")
+for(p in package_list){
+  if(!suppressWarnings(suppressMessages(require(p, character.only = TRUE, quietly = TRUE, warn.conflicts = FALSE)))){
+    biocLite(p)
+    suppressWarnings(suppressMessages(library(p, character.only = TRUE, quietly = TRUE, warn.conflicts = FALSE)))
+  }
+}
 
 library(stringr)
 library(parallel)
-library(DESeq2)
-library(pheatmap)
-library(biomaRt)
-library(org.Rn.eg.db)
-library(clusterProfiler)
-library(factoextra)
 
 # ======= preset data market =======
 mart <- useDataset("rnorvegicus_gene_ensembl", useMart("ENSEMBL_MART_ENSEMBL"))
