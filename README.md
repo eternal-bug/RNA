@@ -1,4 +1,4 @@
-![](./pic/RNA-seq.jpg)
+![](./pic/RNA-seq_small.jpg)
 
 # 目录
 
