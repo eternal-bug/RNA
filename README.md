@@ -2251,7 +2251,7 @@ biocLite("dplyr")
 + [\* RNAseq-workflow](https://github.com/twbattaglia/RNAseq-workflow)
 + [DESeq2分析转录组之预处理+差异分析](https://www.jianshu.com/p/309c35fa6c7f) - 样本对比关系设定
 + [DESeq2 PCA 的一些问题](https://www.jianshu.com/p/b7e55bacbede) - rlog和vst
-+ [Bioconductor分析RNA-seq数据](https://www.jianshu.com/p/8f89284c16f8)
++ [Bioconductor分析RNA-seq数据](https://www.jianshu.com/p/8f89284c16f8) - 说明了转录组分析中的一些理论知识
 + [转录组入门(6)： reads计数](https://www.jianshu.com/p/e9742bbf83b9) - 转录组分析的三个水平
 + [Htseq Count To Fpkm](http://www.bioinfo-scrounger.com/archives/342) - 得到基因的外显子长度
 + [\* 人人都要会的转录组(RNA-seq)下游分析](https://zhuanlan.zhihu.com/p/77901431)
