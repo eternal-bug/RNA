@@ -2262,6 +2262,8 @@ biocLite("dplyr")
 + [RNA-seq中的基因表达量计算和表达差异分析](https://blog.csdn.net/sinat_38163598/article/details/73008592) - DEseq2的归一化的方法
 + [知哥54581孪副3b - 如何理解基因富集分析以及富集的意思？](https://know.baidu.com/wenda/question/info?qid=4f6f8f0b0e01cf7c437e9477bf2bc1b51ef723c)
 + [#基因组干货#之烂大街的GO、KEGG分析作图](https://www.jianshu.com/p/462423702851) - 使用ggplot2来绘制富集图，而不是封装的函数
++ [RPKM vs FPKM vs TPM](http://www.genek.tv/article/23) - 举例子计算`RPKM`和`TPM`
++ [What the FPKM? A review of RNA-Seq expression units](https://haroldpimentel.wordpress.com/2014/05/08/what-the-fpkm-a-review-rna-seq-expression-units/)
 
 ### 结果解读
 
