@@ -2265,6 +2265,7 @@ biocLite("dplyr")
 + [#基因组干货#之烂大街的GO、KEGG分析作图](https://www.jianshu.com/p/462423702851) - 使用ggplot2来绘制富集图，而不是封装的函数
 + [RPKM vs FPKM vs TPM](http://www.genek.tv/article/23) - 举例子计算`RPKM`和`TPM`
 + [What the FPKM? A review of RNA-Seq expression units](https://haroldpimentel.wordpress.com/2014/05/08/what-the-fpkm-a-review-rna-seq-expression-units/)
++ [Top-Down vs. Bottom-Up: What’s the Difference?](https://www.investopedia.com/articles/investing/030116/topdown-vs-bottomup.asp)
 
 ### 结果解读
 
