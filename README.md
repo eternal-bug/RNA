@@ -2274,6 +2274,7 @@ biocLite("dplyr")
 ### 原理
 
 + [如何理解基因富集分析以及富集的意思？](https://www.zhihu.com/question/30778984)
++ [【T】每日一生信--富集分析（超几何分布）（Fisher'sExactTest）](http://blog.sina.com.cn/s/blog_670445240101m4z3.html)
 
 ### 程序下载安装
 
