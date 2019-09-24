@@ -1212,13 +1212,13 @@ write.csv(data_merge, "merge.csv", quote = FALSE, row.names = FALSE)
 但是后续只是为了分析基因的差异表达，所以在对测序**深度进行标准化之后**就可以直接对不同样本同一个基因之间的read count数进行比较，因为并不涉及到一个样本内不同基因的对比。与上面的样本内的不同，这个是属于**样本间**的标准化，因为不同RNA-seq的测序深度可能是有差别的。
 
 ```
-             样本间相同基因的对比（分位数标准化或者深度标准化，或者还是CPM、RPKM、TPM标准化）
+             样本间相同基因的对比（分位数标准化或者深度标准化，或者还是CPM、RPKM、FPKM、TPM标准化）
                     |
           sample1   |   sample2      sample3
 gene1       x    <--+-->  x            x
                                        ^
                                        |
-                                       +------ 样本内的不同基因对比（PKM、CPM、TPM标准化）
+                                       +------ 样本内的不同基因对比（RPKM、FPKM、TPM标准化）
                                        |
                                        v
 gene2       x             x            x
@@ -2270,6 +2270,10 @@ biocLite("dplyr")
 
 + [RNA-seq结果怎么才能看懂?答案全在这些图里---（2）基础分析结果篇](http://www.360doc.com/content/18/0307/18/45848444_735176770.shtml)
 + [手把手教你看富集分析结果之GO富集](http://www.360doc.com/content/17/0919/01/47411701_688261255.shtml)
+
+### 原理
+
++ [如何理解基因富集分析以及富集的意思？](https://www.zhihu.com/question/30778984)
 
 ### 程序下载安装
 
