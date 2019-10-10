@@ -2324,3 +2324,7 @@ biocLite("dplyr")
 **Q：How different is rlog transformation from vst transformation in DESeq2**
 
   + **A：[Question: How different is rlog transformation from vst transformation in DESeq2](https://www.biostars.org/p/338885/)** - 差异不是很明显，但是在运行速度上有一定差别
+
+**Q: RNA-seq analysis- HiSat2 and Cufflinks**
+
+  + **A：[Question: RNA-seq analysis- HiSat2 and Cufflinks](https://biostar.usegalaxy.org/p/18308/)** - `samtools view -Sbo alignments.bam alignments.sam`
