@@ -1634,7 +1634,8 @@ plotPCA(vsdata, intgroup="treatment") + ylim(-10, 10)
 
 ![](./pic/PCA_analysis.png)
 
-距离越近相关性越大，否则越远，如果点单独的偏离，那么这个样本可能不好用。
+
+距离越近相关性越大，否则越远，如果点单独的偏离，那么这个样本可能不好用。有关主成分的分析 - [一文看懂PCA主成分分析](https://mp.weixin.qq.com/s?__biz=MzI5MTcwNjA4NQ==&mid=2247484036&idx=1&sn=22ee356d0c9680d56dada1b777985ed2&scene=21#wechat_redirect)
 
 + sample-to-sample distances热图
 
