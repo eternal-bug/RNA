@@ -2283,18 +2283,15 @@ biocLite("dplyr")
 + [Dawn_天鹏 - 转录组学习三（数据质控）](https://www.jianshu.com/p/bacb86c78b43) - fastqc结果解释的很好
 + [Dawn_天鹏 - 转录组学习七（差异基因分析）](https://www.jianshu.com/p/26511d3360c8)
 + [RNA-seq workflow: gene-level exploratory analysis and differential expression](https://master.bioconductor.org/packages/release/workflows/vignettes/rnaseqGene/inst/doc/rnaseqGene.html)
-+ [\* RNAseq-workflow](https://github.com/twbattaglia/RNAseq-workflow)
 + [DESeq2分析转录组之预处理+差异分析](https://www.jianshu.com/p/309c35fa6c7f) - 样本对比关系设定
 + [DESeq2 PCA 的一些问题](https://www.jianshu.com/p/b7e55bacbede) - rlog和vst
 + [Bioconductor:DESeq2](https://www.jianshu.com/p/bc8a6156c82a) - DESeq2包的介绍
 + [Bioconductor分析RNA-seq数据](https://www.jianshu.com/p/8f89284c16f8) - 说明了转录组分析中的一些理论知识
 + [转录组入门(6)： reads计数](https://www.jianshu.com/p/e9742bbf83b9) - 转录组分析的三个水平
 + [Htseq Count To Fpkm](http://www.bioinfo-scrounger.com/archives/342) - 得到基因的外显子长度
-+ [\* 人人都要会的转录组(RNA-seq)下游分析](https://zhuanlan.zhihu.com/p/77901431)
 + [浅谈GSEA分析和KEGG富集分析的异同](http://www.dxy.cn/bbs/topic/39085659?sf=2&dn=4)
 + [对转录组数据进行质量控制分析](http://www.chenlianfu.com/?p=2286)
 + [RNA-seq 基本分析流程](https://www.cnblogs.com/easoncheng/archive/2013/02/26/2934000.html)
-+ [\* 使用limma、Glimma和edgeR，RNA-seq数据分析易如反掌](https://bioconductor.org/packages/release/workflows/vignettes/RNAseq123/inst/doc/limmaWorkflow_CHN.html)
 + [RNA-seq中的基因表达量计算和表达差异分析](https://blog.csdn.net/sinat_38163598/article/details/73008592) - DEseq2的归一化的方法
 + [知哥54581孪副3b - 如何理解基因富集分析以及富集的意思？](https://know.baidu.com/wenda/question/info?qid=4f6f8f0b0e01cf7c437e9477bf2bc1b51ef723c)
 + [#基因组干货#之烂大街的GO、KEGG分析作图](https://www.jianshu.com/p/462423702851) - 使用ggplot2来绘制富集图，而不是封装的函数
