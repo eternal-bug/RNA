@@ -165,7 +165,9 @@ $ tree
 
 ## 2. 工具下载
 
-### 2.0 conda
+### 2.0 生信管理工具
+
++ conda
 
 conda可以很方便的安装和管理生信相关的工具
 
@@ -188,9 +190,48 @@ conda config --add channels bioconda
 conda create --name python36 python=3.6
 ```
 
++ 🍺Mac brew
+
+```bash
+/usr/bin/ruby -e "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/master/install)"
+```
+
++ 🍺Linux brew
+
+来源[wang-q Ubuntu - ](https://github.com/wang-q/ubuntu#install-linuxbrew)
+
+```bash
+echo "==> Install linuxbrew, copy the next *ONE* line to terminal"
+bash -c "$(curl -fsSL https://raw.githubusercontent.com/Linuxbrew/install/master/install.sh)"
+
+test -d ~/.linuxbrew && PATH="$HOME/.linuxbrew/bin:$HOME/.linuxbrew/sbin:$PATH"
+test -d /home/linuxbrew/.linuxbrew && PATH="/home/linuxbrew/.linuxbrew/bin:/home/linuxbrew/.linuxbrew/sbin:$PATH"
+
+if grep -q -i linuxbrew $HOME/.bashrc; then
+    echo "==> .bashrc already contains linuxbrew"
+else
+    echo "==> Update .bashrc"
+
+    echo >> $HOME/.bashrc
+    echo '# Linuxbrew' >> $HOME/.bashrc
+    echo "export PATH='$(brew --prefix)/bin:$(brew --prefix)/sbin'":'"$PATH"' >> $HOME/.bashrc
+    echo "export MANPATH='$(brew --prefix)/share/man'":'"$MANPATH"' >> $HOME/.bashrc
+    echo "export INFOPATH='$(brew --prefix)/share/info'":'"$INFOPATH"' >> $HOME/.bashrc
+    echo "export HOMEBREW_NO_ANALYTICS=1" >> $HOME/.bashrc
+    echo "export HOMEBREW_NO_AUTO_UPDATE=1" >> $HOME/.bashrc
+    echo >> $HOME/.bashrc
+fi
+
+source $HOME/.bashrc
+```
+
+上述的工具`conda`和`brew`都是可以的，下面都有两种工具的安装方式
+
 ### 2.1 sratoolkit
 
 sra是NCBI的用于下载数据以及转化数据使用
+
++ 本地安装
 
 ```bash
 $ cd ~/biosoft
@@ -205,6 +246,12 @@ $ export PATH="$(pwd):$PATH"
 $ prefetch --help
 ```
 
++ 使用brew安装
+
+```
+brew install sratoolkit
+```
+
 ### 2.2 fastqc
 
 对测序文件质量控制
@@ -215,6 +262,8 @@ $ prefetch --help
 | 手册 | http://www.bioinformatics.babraham.ac.uk/projects/fastqc/Help/ |
 | 中文解释 | https://www.plob.org/article/5987.html |
 
+
++ 本地安装
 
 ```bash
 cd ~/biosoft
@@ -228,6 +277,13 @@ export PATH="$(pwd):$PATH"
 # 测试是否能运行
 fastqc --help
 ```
+
++ 使用brew安装
+
+```bash
+brew install fastqc
+```
+
 ### 2.3 multiqc
 
 将fastqc的统计结果汇聚成一个网页可视化文件，便于查看
@@ -242,6 +298,7 @@ fastqc --help
 # 使用python的安装器安装
 pip install multiqc
 ```
+
 ### 2.4 cutadapt
 
 用于去除测序接头
@@ -251,10 +308,9 @@ pip install multiqc
 | 手册 | https://cutadapt.readthedocs.io/en/stable/guide.html |
 
 ```bash
-conda activate python36
 pip install cutadapt
-conda deactivate
 ```
+
 ### 2.5 trimmomatic
 
 trimmomatic是一款多线程命令行工具，可以用来修剪Illumina (FASTQ)数据以及删除接头，是目前使用最多的高通量测序数据清洗的工具。
@@ -266,6 +322,8 @@ trimmomatic是一款多线程命令行工具，可以用来修剪Illumina (FASTQ
 | 中文解读 |  |
 
 
++ 本地安装
+
 ```bash
 cd ~/biosoft
 wget http://www.usadellab.org/cms/uploads/supplementary/Trimmomatic/Trimmomatic-0.38.zip
@@ -276,6 +334,7 @@ cd Trimmomatic-0.38
 # 导入临时环境变量
 export PATH="$(pwd):$PATH"
 ```
+
 ### 2.6 hisat2
 
 作为bowtie2和tophat的继任者，它在RNA-seq中使用较多。
@@ -320,6 +379,7 @@ $ export PATH="~/biosoft/hisat2-2.1.0:$PATH"
 # 测试是否可用
 $ hisat2 -h
 ```
+
 ### sortmerna
 
 在RNA测序中有很多是rRNA，sortmerna是一款将高通量的测序中的rRNA进行剔除的软件
@@ -409,15 +469,23 @@ $ make -j 4
 # 导入临时环境变量
 $ export PATH="$(pwd):$PATH"
 ```
+
++ 使用brew安装
+
+```bash
+brew install samtools
+```
+
+
 ### 2.8 HTseq
 
 对比对后的文件进行read计数
 
 ```bash
-$ conda activate python36
-$ pip install -i https://pypi.tuna.tsinghua.edu.cn/simple HTseq
-$ conda deactivate
+pip install -i https://pypi.tuna.tsinghua.edu.cn/simple HTseq
 ```
+
+
 ### 2.9 R
 
 - 官网：https://www.r-project.org
@@ -427,6 +495,12 @@ R语言中集合了多种生物信息学的分析工具，其中RNA-seq分析的
 - 下载
 
 点击左上角`CRAN`，往下拉找到`china`的站点，就选第一个[清华的站点](https://mirrors.tuna.tsinghua.edu.cn/CRAN/)，点击进去，之后最上面有三个对应系统的安装包，按照自己的系统下载，这里点击[Mac OS](https://mirrors.tuna.tsinghua.edu.cn/CRAN/bin/macosx/)，点击[R-3.6.1.pkg](https://mirrors.tuna.tsinghua.edu.cn/CRAN/bin/macosx/R-3.6.1.pkg)就开始下载了，下载之后双击安装包安装。
+
++ brew
+
+```
+brew install r
+```
 
 ### 2.10 Rstudio
 
@@ -443,10 +517,10 @@ R语言中集合了多种生物信息学的分析工具，其中RNA-seq分析的
 parallel是进行多线程运行的工具，并行运行可以提升效率，节省时间
 
 ```bash
-$ brew install parallel
+brew install parallel
 ```
 
-### StringTie
+### StringTie[可选]
 
 能够应用流神经网络算法和可选的de novo组装进行转录本组装并预计表达水平。与Cufflinks等程序相比，StringTie实现了更完整、更准确的基因重建，并更好地预测了表达水平。
 
@@ -471,7 +545,7 @@ $ export PATH="$(pwd):$PATH"
 
 $ stringtie --help
 ```
-### Ballgown
+### Ballgown[可选]
 
 是R语言中基因差异表达分析的工具，能利用RNA-Seq实验的数据(StringTie, RSEM, Cufflinks)的结果预测基因、转录本的差异表达。
 
