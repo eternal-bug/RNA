@@ -2357,6 +2357,7 @@ biocLite("dplyr")
 + [Dawn_天鹏 - 转录组学习三（数据质控）](https://www.jianshu.com/p/bacb86c78b43) - fastqc结果解释的很好
 + [Dawn_天鹏 - 转录组学习七（差异基因分析）](https://www.jianshu.com/p/26511d3360c8)
 + [RNA-seq workflow: gene-level exploratory analysis and differential expression](https://master.bioconductor.org/packages/release/workflows/vignettes/rnaseqGene/inst/doc/rnaseqGene.html)
++ [Ming Tang - RNA-seq-analysis](https://github.com/crazyhottommy/RNA-seq-analysis)
 + [DESeq2分析转录组之预处理+差异分析](https://www.jianshu.com/p/309c35fa6c7f) - 样本对比关系设定
 + [DESeq2 PCA 的一些问题](https://www.jianshu.com/p/b7e55bacbede) - rlog和vst
 + [Bioconductor:DESeq2](https://www.jianshu.com/p/bc8a6156c82a) - DESeq2包的介绍
