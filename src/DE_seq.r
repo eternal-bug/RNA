@@ -1,17 +1,26 @@
 rm(list=ls())
 
-source ("https://bioconductor.org/biocLite.R")
+# the R version below 3.5 can use this function to install bio package
+# otherwise use BiocManager 
+# library(BiocManager)
+# BiocManager::install("package")
 
-package_list = c("DESeq2", "pheatmap", "biomaRt", "org.Rn.eg.db", "clusterProfiler", "factoextra")
+# ======== check and install package =======
+source ("https://bioconductor.org/biocLite.R")
+package_list = c("DESeq2",
+                 "pheatmap",
+                 "biomaRt",
+                 "org.Rn.eg.db",
+                 "clusterProfiler",
+                 "factoextra",
+                 "stringr",
+                 "parallel")
 for(p in package_list){
   if(!suppressWarnings(suppressMessages(require(p, character.only = TRUE, quietly = TRUE, warn.conflicts = FALSE)))){
     biocLite(p)
   }
   suppressWarnings(suppressMessages(library(p, character.only = TRUE, quietly = TRUE, warn.conflicts = FALSE)))
 }
-
-library(stringr)
-library(parallel)
 
 # ======= preset data market =======
 mart <- useDataset("rnorvegicus_gene_ensembl", useMart("ENSEMBL_MART_ENSEMBL"))
