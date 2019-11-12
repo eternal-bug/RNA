@@ -3,7 +3,9 @@ rm(list=ls())
 # the R version below 3.5 can use this function to install bio package
 # otherwise use BiocManager 
 # library(BiocManager)
+# options(BioC_mirror='https://mirrors.tuna.tsinghua.edu.cn/bioconductor')
 # BiocManager::install("package")
+
 
 # This is some source at home
 # 中科大: http://mirrors.ustc.edu.cn/bioc/
