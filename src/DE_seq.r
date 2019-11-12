@@ -5,8 +5,16 @@ rm(list=ls())
 # library(BiocManager)
 # BiocManager::install("package")
 
+# This is some source at home
+# 中科大: http://mirrors.ustc.edu.cn/bioc/
+# 清华: https://mirrors.tuna.tsinghua.edu.cn/CRAN/
+
 # ======== check and install package =======
 source ("https://bioconductor.org/biocLite.R")
+# set the download source at home
+options(BioC_mirror="http://mirrors.ustc.edu.cn/bioc/") #中科大
+options(repos=structure(c(CRAN="https://mirrors.tuna.tsinghua.edu.cn/CRAN/")))  #清华
+
 package_list = c("DESeq2",
                  "pheatmap",
                  "biomaRt",
