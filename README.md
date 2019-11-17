@@ -2127,7 +2127,9 @@ kk <- enrichKEGG(gene = gene,
 
 这个是疾病相关的本体分析
 
-### 12.4 另外可以使用几个在线网站
+### 12.5 ReactomePA
+
+### 12.6 另外可以使用几个在线网站
 
 + [metascape](http://metascape.org/gp/index.html)
 
