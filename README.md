@@ -1295,7 +1295,7 @@ write.csv(data_merge, "merge.csv", quote = FALSE, row.names = FALSE)
 但是后续只是为了分析基因的差异表达，所以在对测序**深度进行标准化之后**就可以直接对不同样本同一个基因之间的read count数进行比较，因为并不涉及到一个样本内不同基因的对比。与上面的样本内的不同，这个是属于**样本间**的标准化，因为不同RNA-seq的测序深度可能是有差别的。
 
 ```
-             样本间相同基因的对比（分位数标准化或者深度标准化，或者还是CPM、RPKM、FPKM、TPM标准化）
+             样本间相同基因的对比（TMM分位数标准化或者深度标准化，或者还是CPM、RPKM、FPKM、TPM标准化）
                     |
           sample1   |   sample2      sample3
 gene1       x    <--+-->  x            x
