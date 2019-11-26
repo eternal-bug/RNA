@@ -319,7 +319,28 @@ pip install multiqc
 pip install cutadapt
 ```
 
-### 2.5 trimmomatic
+### 2.5 质量修剪
+
++ Trim Galore
+
+使用perl脚本编写的工具，是对`cutapater`和`fastqc`命令的封装。可以自动检测接头并调用`cutapater`进行
+
+| Trim Galore | 站点                                                         |
+| ----------- | ------------------------------------------------------------ |
+| 官网        | https://github.com/FelixKrueger/TrimGalore/blob/master/Docs/Trim_Galore_User_Guide.md |
+| 手册        | https://github.com/FelixKrueger/TrimGalore/blob/master/Docs/Trim_Galore_User_Guide.md |
+
+```bash
+cd ~/biosoft
+
+wget https://github.com/FelixKrueger/TrimGalore/archive/0.6.3.tar.gz -O TrimGalore.gz
+
+gzip -d TrimGalore.gz
+```
+
++ fastp
+
++ trimmomatic
 
 trimmomatic是一款多线程命令行工具，可以用来修剪Illumina (FASTQ)数据以及删除接头，是目前使用最多的高通量测序数据清洗的工具。
 
@@ -330,7 +351,7 @@ trimmomatic是一款多线程命令行工具，可以用来修剪Illumina (FASTQ
 | 中文解读 |  |
 
 
-+ 本地安装
+本地安装
 
 ```bash
 cd ~/biosoft
