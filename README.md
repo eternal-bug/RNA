@@ -408,7 +408,7 @@ $ export PATH="~/biosoft/hisat2-2.1.0:$PATH"
 $ hisat2 -h
 ```
 
-### sortmerna
+### sortmerna [选做]
 
 在RNA测序中有很多是rRNA，sortmerna是一款将高通量的测序中的rRNA进行剔除的软件
 
@@ -712,7 +712,8 @@ KL568139.1	9752924
 KL568161.1	7627431
 ...
 ```
-这里为了方便演示，直接用1号染色体的基因组
+
+这里为了方便演示，直接用1号染色体的基因组作为后续比对。
 
 ```bash
 $ cat rn6.fa | perl -n -e '
@@ -744,7 +745,7 @@ $ cat rn6.fa | perl -n -e '
 
 + 下载基因组索引文件 - [**可选**]
 
-在`hisat2` 官网上可以找到现成的已经建立好索引的大鼠基因组文件，如果电脑配置一般建议直接下载好索引文件，可以直接下载这个索引文件（因为建立索引文件时间较长1个小时以上）
+在`hisat2` 官网上可以找到现成的已经建立好索引的大鼠基因组文件，如果电脑配置一般建议直接下载好索引文件，可以直接下载这个索引文件（因为建立索引文件时间较长1个小时以上），这个索引文件是可以自己用命令基于之前下载的基因组文件自行建立的。
 
 ```bash
 $ cd ~/project/rat/genome
@@ -974,7 +975,7 @@ $ multiqc .
 ```
 相对于上面的情况，现在好多了
 
-## 5. 去除rRNA序列
+## 5. 去除rRNA序列[可不做]
 
 如果在提取RNA过程中没有对RNA进行筛选的情况下，那么得到的大部分将会是`rRNA`，这个对于后续的分析可能会存在影响，另外也会让比对的时间变长。
 
@@ -1043,23 +1044,23 @@ $ cd ~/project/rat/genome
 $ mkdir index
 $ cd index
 
-$ hisat2-build  -p 6 ../rn6.fa rn6
+$ hisat2-build  -p 6 ../rn6.chr1.fa rn6.chr1
 ```
 在运行过程中会有部分信息提示，其中说到建立索引文件的分块情况以及运行时间的统计
 
 索引建立完成之后在`~/project/rat/genome`文件夹下会出现
 
 ```
-rn6.1.ht2
-rn6.2.ht2
-rn6.3.ht2
-rn6.4.ht2
-rn6.5.ht2
-rn6.6.ht2
-rn6.7.ht2
-rn6.8.ht2
+rn6.chr1.1.ht2
+rn6.chr1.2.ht2
+rn6.chr1.3.ht2
+rn6.chr1.4.ht2
+rn6.chr1.5.ht2
+rn6.chr1.6.ht2
+rn6.chr1.7.ht2
+rn6.chr1.8.ht2
 ```
-8个文件，这些文件是对基因组进行压缩之后的文件，这个将基因组序列数据分块成了8份，在执行序列比对的时候直接使用这些文件而不是基因组`rn6.fa`文件。
+8个文件，这些文件是对基因组进行压缩之后的文件，这个将基因组序列数据分块成了8份，在执行序列比对的时候直接使用这些文件而不是基因组`rn6.chr1.fa`文件。
 
 
 ### 6.2  开始比对
@@ -1080,7 +1081,7 @@ $ mkdir align
 $ cd rRNA
 
 $ parallel -k -j 4 "
-    hisat2 -t -x ../../genome/index/rn6 \
+    hisat2 -t -x ../../genome/index/rn6.chr1 \
       -U {1}.fq.gz -S ../align/{1}.sam \
       2>../align/{1}.log
 " ::: $(ls *.gz | perl -p -e 's/.fq.gz$//')
@@ -1093,23 +1094,26 @@ $ cd ~/project/rat/output/align
 $ cat SRR2190795.log
 ```
 
+
 ```
-Time loading forward index: 00:00:17
-Time loading reference: 00:00:04
-Multiseed full-index search: 00:18:59
-14998487 reads; of these:
-  14998487 (100.00%) were unpaired; of these:
-    1350172 (9.00%) aligned 0 times
-    12410890 (82.75%) aligned exactly 1 time
-    1237425 (8.25%) aligned >1 times
-91.00% overall alignment rate
-Time searching: 00:19:25
-Overall time: 00:19:42
+Time loading forward index: 00:00:01
+Time loading reference: 00:00:00
+Multiseed full-index search: 00:09:45
+22507073 reads; of these:
+  22507073 (100.00%) were unpaired; of these:
+    19556407 (86.89%) aligned 0 times
+    2693776 (11.97%) aligned exactly 1 time
+    256890 (1.14%) aligned >1 times
+13.11% overall alignment rate
+Time searching: 00:09:45
+Overall time: 00:09:46
 ```
 
-日志信息中说到了比对花费的时间以及比对情况。这里可以看到`91.00%`的比对率，比率还可以。
+日志信息中说到了比对花费的时间以及比对情况。这里可以看到`13.11%`的比对率，一般情况下如果是比对到全基因组上，那么比对率可以达到`95%`以上，这里因为我们是拿的`chr1`做的测试的比对，所以比率还可以，没有问题。
 
 + 总结比对情况
+
+自己写一个脚本将序列比对率和时间进行统计
 
 ```bash
 cd ~/project/rat/output/align
