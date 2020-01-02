@@ -598,7 +598,7 @@ biocLite("Ballgown")
 
 + 1. 首先下载基因组数据
 
-进入ENSEMBL网站，在左侧`All genomes`中，选择物种`Rat`，之后页面会自动跳转到大鼠的页面，首先点击左侧[Download DNA sequence (FASTA)](ftp://ftp.ensembl.org/pub/release-97/fasta/rattus_norvegicus/dna/) 进入基因组序列数据的下载地址，其次点击右侧的[Download GTF](ftp://ftp.ensembl.org/pub/release-97/gtf/rattus_norvegicus/) or [GFF3](ftp://ftp.ensembl.org/pub/release-97/gff3/rattus_norvegicus/) files for genes, cDNAs, ncRNA, proteins，这里就点击`GFF`的
+进入ENSEMBL网站，在左侧`All genomes`中，选择物种`Rat`，之后页面会自动跳转到大鼠的页面，首先点击左侧[Download DNA sequence (FASTA)](ftp://ftp.ensembl.org/pub/release-97/fasta/rattus_norvegicus/dna/) 进入基因组序列数据的下载地址，其次点击右侧的[Download GTF](ftp://ftp.ensembl.org/pub/release-97/gtf/rattus_norvegicus/) or [GFF3](ftp://ftp.ensembl.org/pub/release-97/gff3/rattus_norvegicus/) files for genes, cDNAs, ncRNA, proteins，这里就点击`GTF`的
 
 ![](./pic/ENSEMBL_rat.png)
 
@@ -2392,6 +2392,7 @@ biocLite("dplyr")
 + [Dawn_天鹏 - 转录组学习七（差异基因分析）](https://www.jianshu.com/p/26511d3360c8)
 + [RNA-seq workflow: gene-level exploratory analysis and differential expression](https://master.bioconductor.org/packages/release/workflows/vignettes/rnaseqGene/inst/doc/rnaseqGene.html)
 + [GEO数据挖掘-从数据下载到富集分析-各种绘图（学习笔记）](https://blog.csdn.net/weixin_43700050/article/details/86511630) - R脚本较为全面
++ [xuzhougeng/Learn-Bioinformatics](https://github.com/xuzhougeng/Learn-Bioinformatics)
 + [enrichplot: 让你们对clusterProfiler系列包无法自拔](http://www.360doc.com/content/18/0309/18/33459258_735717104.shtml) - clusterProfiler的各种可视化方法的介绍
 + [Ming Tang - RNA-seq-analysis](https://github.com/crazyhottommy/RNA-seq-analysis)
 + [DESeq2分析转录组之预处理+差异分析](https://www.jianshu.com/p/309c35fa6c7f) - 样本对比关系设定
